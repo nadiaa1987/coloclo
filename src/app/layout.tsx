@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'LinkVision',
-  description: 'Generate images from prompts using AI.',
+  title: 'Coloring Page Generator',
+  description: 'Generate coloring book pages from prompts using AI.',
 };
 
 export default function RootLayout({

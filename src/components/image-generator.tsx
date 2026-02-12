@@ -26,7 +26,7 @@ export function ImageGenerator() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      prompt: "A photorealistic cat astronaut on Mars",
+      prompt: "A friendly dragon",
     },
   });
 
@@ -59,7 +59,7 @@ export function ImageGenerator() {
     if (imageUrl) {
       const link = document.createElement('a');
       link.href = imageUrl;
-      link.download = `linkvision-${form.getValues('prompt').replace(/\s/g, '-')}.png`;
+      link.download = `coloring-page-${form.getValues('prompt').replace(/\s/g, '-')}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -72,10 +72,10 @@ export function ImageGenerator() {
         <CardHeader className="text-center">
           <div className="inline-flex items-center justify-center gap-2 mx-auto">
              <Wand2 className="h-8 w-8 text-primary" />
-            <CardTitle className="text-4xl font-headline tracking-tighter">LinkVision</CardTitle>
+            <CardTitle className="text-4xl font-headline tracking-tighter">Coloring Page Generator</CardTitle>
           </div>
           <CardDescription className="pt-2">
-            Turn your text prompts into stunning visuals with AI.
+            Turn your text prompts into coloring book pages with AI.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -129,7 +129,7 @@ export function ImageGenerator() {
               {!isLoading && !imageUrl && (
                 <div className="flex flex-col items-center gap-2 text-center">
                   <ImageIcon className="h-12 w-12" />
-                  <p className="font-medium">Your generated image will appear here</p>
+                  <p className="font-medium">Your generated coloring page will appear here</p>
                 </div>
               )}
               {imageUrl && (
@@ -138,7 +138,7 @@ export function ImageGenerator() {
                   alt={form.getValues('prompt')}
                   fill
                   className="object-contain"
-                  data-ai-hint="generated image"
+                  data-ai-hint="generated image coloring page"
                   unoptimized
                 />
               )}
