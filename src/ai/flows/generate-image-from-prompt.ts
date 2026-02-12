@@ -46,11 +46,14 @@ const generateImageFromPromptFlow = ai.defineFlow(
   },
   async (input) => {
     const encodedPrompt = encodeURIComponent(input.prompt);
-    const seed = Math.floor(Math.random() * 1000000000); // Generate a random seed
 
-    const imageUrl = `https://gen.pollinations.ai/image/${encodedPrompt}?model=flux&width=1024&height=1024&seed=${seed}&key=sk_UOsZfgtGMSYNskyHUmwbWTQEdYPKv2UxR`;
+    const imageUrl = `https://gen.pollinations.ai/image/${encodedPrompt}`;
 
-    const response = await fetch(imageUrl);
+    const response = await fetch(imageUrl, {
+        headers: {
+            'Authorization': 'Bearer sk_UOsZKtGMSYNskyHUmwbWTQEdYPKv2UxR'
+        }
+    });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch image from Pollinations AI: ${response.statusText}`);
