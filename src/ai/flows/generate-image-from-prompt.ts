@@ -49,11 +49,7 @@ const generateImageFromPromptFlow = ai.defineFlow(
 
     const imageUrl = `https://gen.pollinations.ai/image/${encodedPrompt}`;
 
-    const response = await fetch(imageUrl, {
-        headers: {
-            'Authorization': 'Bearer sk_UOsZKtGMSYNskyHUmwbWTQEdYPKv2UxR'
-        }
-    });
+    const response = await fetch(imageUrl);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch image from Pollinations AI: ${response.statusText}`);
