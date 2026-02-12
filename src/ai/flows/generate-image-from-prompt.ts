@@ -47,7 +47,7 @@ const generateImageFromPromptFlow = ai.defineFlow(
   async (input) => {
     const encodedPrompt = encodeURIComponent(input.prompt);
 
-    const imageUrl = `https://gen.pollinations.ai/image/${encodedPrompt}`;
+    const imageUrl = `https://gen.pollinations.ai/image/${encodedPrompt}?model=flux&width=1024&height=1024&seed=123&key=sk_UOsZKtGMSYNskyHUmwbWTQEdYPKv2UxR`;
 
     const response = await fetch(imageUrl);
 
