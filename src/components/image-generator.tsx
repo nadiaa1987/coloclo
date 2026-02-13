@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -33,7 +33,6 @@ export function ImageGenerator({ initialPrompts, bookTopic, onBack }: ImageGener
   const [imageResults, setImageResults] = useState<ImageResult[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const submissionTriggered = useRef(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -87,14 +86,6 @@ export function ImageGenerator({ initialPrompts, bookTopic, onBack }: ImageGener
     }
   }
 
-  useEffect(() => {
-    if (initialPrompts && initialPrompts.length > 0 && !submissionTriggered.current) {
-      submissionTriggered.current = true;
-      form.handleSubmit(onSubmit)();
-    }
-  }, [initialPrompts, form, onSubmit]);
-
-
   const handleDownload = (imageUrl: string, prompt: string) => {
     if (imageUrl) {
       const link = document.createElement('a');
@@ -106,8 +97,6 @@ export function ImageGenerator({ initialPrompts, bookTopic, onBack }: ImageGener
       document.body.removeChild(link);
     }
   };
-
-  const isAutoGenerating = !!initialPrompts;
 
   return (
     <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
@@ -122,49 +111,47 @@ export function ImageGenerator({ initialPrompts, bookTopic, onBack }: ImageGener
             <CardTitle className="text-4xl font-headline tracking-tighter">AI Coloring Book Page Generator</CardTitle>
           </div>
           <CardDescription className="pt-2">
-            {isAutoGenerating
-              ? `Generating images for your book: "${bookTopic}"`
+            {bookTopic
+              ? `Here are the prompts for your book: "${bookTopic}". You can edit them before generating.`
               : "Turn your text prompts into coloring book pages for KDP. Enter one prompt per line."
             }
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {!isAutoGenerating && (
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="prompts"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="sr-only">Prompts</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          className="text-base min-h-[120px]"
-                          placeholder="e.g., A cute cat wearing a wizard hat&#10;An astronaut dog on the moon"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" size="lg" className="w-full text-lg" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="animate-spin -ml-1 mr-3 h-5 w-5" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Wand2 className="mr-2 h-5 w-5" />
-                      Generate Images
-                    </>
-                  )}
-                </Button>
-              </form>
-            </Form>
-          )}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="prompts"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="sr-only">Prompts</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        className="text-base min-h-[120px]"
+                        placeholder="e.g., A cute cat wearing a wizard hat&#10;An astronaut dog on the moon"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" size="lg" className="w-full text-lg" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin -ml-1 mr-3 h-5 w-5" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="mr-2 h-5 w-5" />
+                    Generate Images
+                  </>
+                )}
+              </Button>
+            </form>
+          </Form>
 
           <div className="mt-8">
             {isLoading && (
