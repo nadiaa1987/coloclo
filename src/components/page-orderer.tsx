@@ -80,27 +80,25 @@ export function PageOrderer({ initialImages, onBack, bookTopic }: PageOrdererPro
                 onDrop={(e) => handleDrop(e, page.id)}
                 onDragEnd={handleDragEnd}
                 className={cn(
-                  "flex items-start gap-2 rounded-lg border bg-card p-2 shadow-sm transition-all cursor-grab active:cursor-grabbing",
+                  "rounded-lg border bg-card p-2 shadow-sm transition-all cursor-grab active:cursor-grabbing flex flex-col",
                   draggingItem === page.id && "opacity-50 scale-105"
                 )}
               >
-                <div className="flex flex-col items-center gap-1 pt-1">
-                    <GripVertical className="h-5 w-5 text-muted-foreground" />
-                    <span className="font-bold text-lg">{index + 1}</span>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-bold text-lg">{index + 1}</span>
+                  <GripVertical className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <div className="flex-1">
-                    <div className="aspect-square relative w-full bg-muted/50 rounded-md overflow-hidden">
-                        <Image
-                            src={page.imageUrl}
-                            alt={page.prompt}
-                            fill
-                            className="object-contain"
-                            data-ai-hint="generated coloring page"
-                            unoptimized
-                        />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2 truncate" title={page.prompt}>{page.prompt}</p>
+                <div className="aspect-square relative w-full bg-muted/50 rounded-md overflow-hidden">
+                    <Image
+                        src={page.imageUrl}
+                        alt={page.prompt}
+                        fill
+                        className="object-contain"
+                        data-ai-hint="generated coloring page"
+                        unoptimized
+                    />
                 </div>
+                <p className="text-xs text-muted-foreground mt-2 truncate" title={page.prompt}>{page.prompt}</p>
               </div>
             ))}
           </div>
