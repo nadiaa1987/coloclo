@@ -14,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { generateBulkImagesAction, regenerateImageAction } from "@/app/actions";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const formSchema = z.object({
   prompts: z.string().min(1, "At least one prompt is required."),
@@ -240,6 +240,8 @@ export function ImageGenerator({ initialPrompts, bookTopic, onBack }: ImageGener
                             </div>
                           </DialogTrigger>
                           <DialogContent className="max-w-3xl p-2">
+                             <DialogTitle className="sr-only">{result.prompt}</DialogTitle>
+                             <DialogDescription className="sr-only">An enlarged view of the generated image for the prompt: {result.prompt}</DialogDescription>
                              <div className="aspect-square relative w-full">
                                 <Image
                                     src={result.imageUrl}
