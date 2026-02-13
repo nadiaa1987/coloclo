@@ -1,97 +1,165 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { ImageGenerator } from "@/components/image-generator";
-import { PromptGenerator } from "@/components/prompt-generator";
-import { PageOrderer } from '@/components/page-orderer';
-import { Loader2 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Loader2, PlusSquare, Star, History, HelpCircle, Activity, Box, Calendar, ShieldCheck, Paintbrush } from 'lucide-react';
 
-type ImageResult = {
-  id: string;
-  imageUrl: string;
-  prompt: string;
+type QuickAction = {
+  title: string;
+  description: string;
+  href: string;
+  icon: React.ElementType;
 };
 
-type KdpSettings = {
-  size: string;
-  bleed: string;
-};
+const quickActions: QuickAction[] = [
+  {
+    title: 'AI Generator',
+    description: 'Create new masterpieces',
+    href: '/create',
+    icon: Paintbrush,
+  },
+  {
+    title: 'Upgrade Plan',
+    description: 'Extend your capabilities',
+    href: '/upgrade',
+    icon: Star,
+  },
+  {
+    title: 'View History',
+    description: 'Browse your gallery',
+    href: '/history',
+    icon: History,
+  },
+  {
+    title: 'Support Center',
+    description: 'Help & documentation',
+    href: '/contact',
+    icon: HelpCircle,
+  },
+];
 
-export default function Home() {
+type StatCardProps = {
+  title: string;
+  value: string;
+  description?: string;
+  icon: React.ElementType;
+}
+
+const StatCard = ({ title, value, description, icon: Icon }: StatCardProps) => (
+  <Card>
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardTitle className="text-sm font-medium">{title}</CardTitle>
+      <Icon className="h-4 w-4 text-muted-foreground" />
+    </CardHeader>
+    <CardContent>
+      <div className="text-2xl font-bold">{value}</div>
+      {description && <p className="text-xs text-muted-foreground">{description}</p>}
+    </CardContent>
+  </Card>
+);
+
+export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [step, setStep] = useState<'prompt' | 'image' | 'order'>('prompt');
-  const [prompts, setPrompts] = useState<string[]>([]);
-  const [topic, setTopic] = useState<string>('');
-  const [finalImages, setFinalImages] = useState<ImageResult[]>([]);
-  const [kdpSettings, setKdpSettings] = useState<KdpSettings>({ size: '8.5x11', bleed: 'no-bleed' });
 
   useEffect(() => {
-    // If not loading and no user, redirect to login
     if (!loading && !user) {
       router.push('/login');
     }
   }, [user, loading, router]);
 
-
-  const handlePromptsGenerated = (generatedPrompts: string[], bookTopic: string, settings: KdpSettings) => {
-    setPrompts(generatedPrompts);
-    setTopic(bookTopic);
-    setKdpSettings(settings);
-    setStep('image');
-  };
-
-  const handleImagesGenerated = (images: ImageResult[]) => {
-    setFinalImages(images);
-    setStep('order');
-  }
-
-  const handleBackToPrompt = () => {
-    setStep('prompt');
-    setPrompts([]);
-    setTopic('');
-    setFinalImages([]);
-  };
-
-  const handleBackToImages = () => {
-    setStep('image');
-  };
-
-  // While loading or if no user, show a loading spinner
   if (loading || !user) {
     return (
-      <main className="flex items-center justify-center min-h-screen -mt-14">
+      <main className="flex h-screen items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </main>
     );
   }
 
-  // If user is logged in, show the app
+  const getInitials = (email: string | null) => {
+    if (!email) return 'U';
+    return email.charAt(0).toUpperCase();
+  };
+
+
   return (
-    <main className="min-h-screen w-full">
-      {step === 'prompt' && (
-        <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
-            <PromptGenerator onPromptsGenerated={handlePromptsGenerated} />
-        </div>
-      )}
-      {step === 'image' && (
-        <ImageGenerator 
-          initialPrompts={prompts}
-          bookTopic={topic}
-          onBack={handleBackToPrompt}
-          onImagesGenerated={handleImagesGenerated}
-        />
-      )}
-      {step === 'order' && (
-        <PageOrderer
-          initialImages={finalImages}
-          bookTopic={topic}
-          onBack={handleBackToImages}
-          kdpSettings={kdpSettings}
-        />
-      )}
-    </main>
+    <div className="flex-1 space-y-4 p-4 sm:p-8 pt-6">
+      <div className="flex items-center justify-between space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+      </div>
+      
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-2xl">Welcome back, {user.email}!</CardTitle>
+            <CardDescription className="mt-2">
+              Create amazing images with our state-of-the-art AI technology. All your tools are ready for your next masterpiece.
+            </CardDescription>
+          </div>
+          <Button asChild>
+            <Link href="/create">
+              <PlusSquare className="mr-2 h-4 w-4" />
+              Create New
+            </Link>
+          </Button>
+        </CardHeader>
+      </Card>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard title="Total Generations" value="81" icon={Box} />
+        <StatCard title="Images Today" value="0/∞" icon={Calendar} />
+        <StatCard title="Current Plan" value="Pro" description="LIFETIME ACCESS" icon={Star} />
+        <StatCard title="Creation Limit" value="Unlimited" icon={ShieldCheck} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-2">
+            {quickActions.map((action) => (
+              <Link href={action.href} key={action.title} className="group">
+                <Card className="h-full hover:border-primary transition-colors">
+                  <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+                    <action.icon className="h-6 w-6 text-primary" />
+                    <div>
+                      <p className="font-semibold">{action.title}</p>
+                      <p className="text-sm text-muted-foreground">{action.description}</p>
+                    </div>
+                  </CardHeader>
+                </Card>
+              </Link>
+            ))}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+             <div className="flex items-center">
+              <Activity className="h-5 w-5 mr-4 text-primary" />
+              <div className="flex-1 space-y-1">
+                <p className="text-sm font-medium leading-none">Welcome to the App!</p>
+                <p className="text-sm text-muted-foreground">Just now</p>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <Star className="h-5 w-5 mr-4 text-yellow-500" />
+              <div className="flex-1 space-y-1">
+                <p className="text-sm font-medium leading-none">Account initialized</p>
+                <p className="text-sm text-muted-foreground">Today</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

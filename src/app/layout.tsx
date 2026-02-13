@@ -1,7 +1,7 @@
-import type {Metadata} from 'next';
+import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
-import { Header } from '@/components/header';
+import { MainLayout } from '@/components/main-layout';
 
 export const metadata: Metadata = {
   title: 'AI Coloring Book Page Generator for KDP',
@@ -21,8 +21,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <Header />
-        {children}
+        <MainLayout>
+          {children}
+        </MainLayout>
         <Toaster />
       </body>
     </html>
