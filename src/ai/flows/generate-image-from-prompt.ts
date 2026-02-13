@@ -45,8 +45,7 @@ const generateImageFromPromptFlow = ai.defineFlow(
     outputSchema: GenerateImageFromPromptOutputSchema,
   },
   async (input) => {
-    const modifiedPrompt = `${input.prompt}, coloring book page, black and white, clean line art`;
-    const encodedPrompt = encodeURIComponent(modifiedPrompt);
+    const encodedPrompt = encodeURIComponent(input.prompt);
 
     const imageUrl = `https://gen.pollinations.ai/image/${encodedPrompt}?model=flux&width=1024&height=1024&seed=123&key=sk_UOsZKtGMSYNskyHUmwbWTQEdYPKv2UxR`;
 
