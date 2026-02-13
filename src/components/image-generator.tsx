@@ -26,7 +26,7 @@ export function ImageGenerator() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      prompt: "A friendly dragon",
+      prompt: "A cute unicorn in a magical forest",
     },
   });
 
@@ -72,10 +72,10 @@ export function ImageGenerator() {
         <CardHeader className="text-center">
           <div className="inline-flex items-center justify-center gap-2 mx-auto">
              <Wand2 className="h-8 w-8 text-primary" />
-            <CardTitle className="text-4xl font-headline tracking-tighter">AI Image Generator</CardTitle>
+            <CardTitle className="text-4xl font-headline tracking-tighter">AI Coloring Book Page Generator</CardTitle>
           </div>
           <CardDescription className="pt-2">
-            Turn your text prompts into images with AI.
+            Turn your text prompts into coloring book pages for KDP.
           </CardDescription>
         </CardHeader>
         <CardContent>
