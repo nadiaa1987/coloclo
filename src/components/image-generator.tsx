@@ -5,20 +5,22 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Image from "next/image";
-import { Wand2, Download, Image as ImageIcon, ArrowLeft, Loader2 } from "lucide-react";
+import { Wand2, Download, Image as ImageIcon, ArrowLeft, Loader2, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { generateBulkImagesAction } from "@/app/actions";
+import { generateBulkImagesAction, regenerateImageAction } from "@/app/actions";
+import { Input } from "@/components/ui/input";
 
 const formSchema = z.object({
   prompts: z.string().min(1, "At least one prompt is required."),
 });
 
 type ImageResult = {
+  id: string;
   imageUrl: string;
   prompt: string;
 };
@@ -32,6 +34,7 @@ type ImageGeneratorProps = {
 export function ImageGenerator({ initialPrompts, bookTopic, onBack }: ImageGeneratorProps) {
   const [imageResults, setImageResults] = useState<ImageResult[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [regeneratingIds, setRegeneratingIds] = useState<string[]>([]);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -61,7 +64,7 @@ export function ImageGenerator({ initialPrompts, bookTopic, onBack }: ImageGener
       
       const successfulResults = results
         .filter(r => r.success && r.imageUrl)
-        .map(r => ({ imageUrl: r.imageUrl!, prompt: r.prompt }));
+        .map((r, index) => ({ id: `${Date.now()}-${index}`, imageUrl: r.imageUrl!, prompt: r.prompt }));
 
       if(successfulResults.length > 0) {
         setImageResults(successfulResults);
@@ -97,6 +100,47 @@ export function ImageGenerator({ initialPrompts, bookTopic, onBack }: ImageGener
       document.body.removeChild(link);
     }
   };
+
+  const handlePromptChange = (id: string, newPrompt: string) => {
+    setImageResults(prevResults => 
+      prevResults?.map(result => 
+        result.id === id ? { ...result, prompt: newPrompt } : result
+      ) ?? null
+    );
+  };
+
+  const handleRegenerate = async (id: string, prompt: string) => {
+    setRegeneratingIds(prev => [...prev, id]);
+    try {
+      const result = await regenerateImageAction({ prompt });
+      if (result.success && result.imageUrl) {
+        setImageResults(prevResults =>
+          prevResults?.map(r => 
+            r.id === id ? { ...r, imageUrl: result.imageUrl! } : r
+          ) ?? null
+        );
+        toast({
+          title: "Image Regenerated!",
+          description: "The image has been updated with your new prompt.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Failed to regenerate image",
+          description: result.error || "An unknown error occurred.",
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "An error occurred",
+        description: "Could not connect to the image generation service.",
+      });
+    } finally {
+      setRegeneratingIds(prev => prev.filter(regenId => regenId !== id));
+    }
+  };
+
 
   return (
     <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
@@ -171,29 +215,52 @@ export function ImageGenerator({ initialPrompts, bookTopic, onBack }: ImageGener
             )}
             {imageResults && imageResults.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {imageResults.map((result, index) => (
-                  <Card key={index} className="overflow-hidden flex flex-col">
-                    <CardContent className="p-0">
-                      <div className="aspect-square relative w-full bg-muted/50">
-                        <Image
-                          src={result.imageUrl}
-                          alt={result.prompt}
-                          fill
-                          className="object-contain"
-                          data-ai-hint="generated coloring page"
-                          unoptimized
+                {imageResults.map((result) => {
+                  const isRegenerating = regeneratingIds.includes(result.id);
+                  return (
+                    <Card key={result.id} className="overflow-hidden flex flex-col">
+                      <CardContent className="p-0">
+                        <div className="aspect-square relative w-full bg-muted/50">
+                          {isRegenerating && (
+                             <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50">
+                               <Loader2 className="h-8 w-8 animate-spin text-white" />
+                             </div>
+                          )}
+                          <Image
+                            src={result.imageUrl}
+                            alt={result.prompt}
+                            fill
+                            className="object-contain"
+                            data-ai-hint="generated coloring page"
+                            unoptimized
+                          />
+                        </div>
+                      </CardContent>
+                      <CardFooter className="flex-col items-start gap-2 p-4">
+                        <Input
+                          value={result.prompt}
+                          onChange={(e) => handlePromptChange(result.id, e.target.value)}
+                          className="w-full"
+                          disabled={isRegenerating}
                         />
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex-col items-start gap-2 p-4">
-                       <p className="text-sm text-muted-foreground truncate w-full" title={result.prompt}>"{result.prompt}"</p>
-                        <Button onClick={() => handleDownload(result.imageUrl, result.prompt)} variant="secondary" className="w-full">
-                          <Download className="mr-2 h-4 w-4" />
-                          Download
-                        </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
+                        <div className="w-full grid grid-cols-2 gap-2">
+                           <Button onClick={() => handleRegenerate(result.id, result.prompt)} variant="secondary" className="w-full" disabled={isRegenerating}>
+                             {isRegenerating ? (
+                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                             ) : (
+                               <RefreshCw className="mr-2 h-4 w-4" />
+                             )}
+                             Regenerate
+                           </Button>
+                           <Button onClick={() => handleDownload(result.imageUrl, result.prompt)} className="w-full">
+                             <Download className="mr-2 h-4 w-4" />
+                             Download
+                           </Button>
+                        </div>
+                      </CardFooter>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </div>

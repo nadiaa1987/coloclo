@@ -1,6 +1,6 @@
 'use server';
 
-import { generateImageFromPrompt } from '@/ai/flows/generate-image-from-prompt';
+import { generateImageFromPrompt, GenerateImageFromPromptInput } from '@/ai/flows/generate-image-from-prompt';
 import { generatePrompts, GeneratePromptsInput } from '@/ai/flows/generate-prompts-flow';
 
 export async function generatePromptsAction(
@@ -32,4 +32,17 @@ export async function generateBulkImagesAction(
     })
   );
   return results;
+}
+
+export async function regenerateImageAction(
+  input: GenerateImageFromPromptInput
+): Promise<{ success: boolean; imageUrl?: string; error?: string }> {
+  try {
+    const output = await generateImageFromPrompt(input);
+    return { success: true, imageUrl: output.imageUrl };
+  } catch (error) {
+    console.error(error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to generate image.';
+    return { success: false, error: errorMessage };
+  }
 }
