@@ -1,6 +1,20 @@
 'use server';
 
 import { generateImageFromPrompt } from '@/ai/flows/generate-image-from-prompt';
+import { generatePrompts, GeneratePromptsInput } from '@/ai/flows/generate-prompts-flow';
+
+export async function generatePromptsAction(
+  input: GeneratePromptsInput
+): Promise<{ success: boolean; prompts?: string[]; error?: string }> {
+  try {
+    const { prompts } = await generatePrompts(input);
+    return { success: true, prompts };
+  } catch (error) {
+    console.error(error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to generate prompts.';
+    return { success: false, error: errorMessage };
+  }
+}
 
 export async function generateBulkImagesAction(
   { prompts }: { prompts: string[] }

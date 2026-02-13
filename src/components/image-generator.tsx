@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Image from "next/image";
-import { Wand2, Download, Image as ImageIcon } from "lucide-react";
+import { Wand2, Download, Image as ImageIcon, ArrowLeft, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,15 +23,22 @@ type ImageResult = {
   prompt: string;
 };
 
-export function ImageGenerator() {
+type ImageGeneratorProps = {
+  initialPrompts?: string[];
+  bookTopic?: string;
+  onBack: () => void;
+};
+
+export function ImageGenerator({ initialPrompts, bookTopic, onBack }: ImageGeneratorProps) {
   const [imageResults, setImageResults] = useState<ImageResult[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const submissionTriggered = useRef(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      prompts: "A cute unicorn in a magical forest\nA happy robot waving",
+      prompts: initialPrompts?.join("\n") ?? "A cute unicorn in a magical forest\nA happy robot waving",
     },
   });
 
@@ -80,6 +87,14 @@ export function ImageGenerator() {
     }
   }
 
+  useEffect(() => {
+    if (initialPrompts && initialPrompts.length > 0 && !submissionTriggered.current) {
+      submissionTriggered.current = true;
+      form.handleSubmit(onSubmit)();
+    }
+  }, [initialPrompts, form, onSubmit]);
+
+
   const handleDownload = (imageUrl: string, prompt: string) => {
     if (imageUrl) {
       const link = document.createElement('a');
@@ -92,8 +107,14 @@ export function ImageGenerator() {
     }
   };
 
+  const isAutoGenerating = !!initialPrompts;
+
   return (
     <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+       <Button onClick={onBack} variant="ghost" className="mb-4">
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Prompt Ideas
+      </Button>
       <Card className="max-w-6xl mx-auto shadow-lg rounded-xl">
         <CardHeader className="text-center">
           <div className="inline-flex items-center justify-center gap-2 mx-auto">
@@ -101,47 +122,49 @@ export function ImageGenerator() {
             <CardTitle className="text-4xl font-headline tracking-tighter">AI Coloring Book Page Generator</CardTitle>
           </div>
           <CardDescription className="pt-2">
-            Turn your text prompts into coloring book pages for KDP. Enter one prompt per line.
+            {isAutoGenerating
+              ? `Generating images for your book: "${bookTopic}"`
+              : "Turn your text prompts into coloring book pages for KDP. Enter one prompt per line."
+            }
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="prompts"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="sr-only">Prompts</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        className="text-base min-h-[120px]"
-                        placeholder="e.g., A cute cat wearing a wizard hat&#10;An astronaut dog on the moon"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" size="lg" className="w-full text-lg" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Wand2 className="mr-2 h-5 w-5" />
-                    Generate Images
-                  </>
-                )}
-              </Button>
-            </form>
-          </Form>
+          {!isAutoGenerating && (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="prompts"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="sr-only">Prompts</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          className="text-base min-h-[120px]"
+                          placeholder="e.g., A cute cat wearing a wizard hat&#10;An astronaut dog on the moon"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" size="lg" className="w-full text-lg" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="animate-spin -ml-1 mr-3 h-5 w-5" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="mr-2 h-5 w-5" />
+                      Generate Images
+                    </>
+                  )}
+                </Button>
+              </form>
+            </Form>
+          )}
 
           <div className="mt-8">
             {isLoading && (
