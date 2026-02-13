@@ -93,7 +93,14 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
         format: [pageWidth, pageHeight],
       });
 
+      // Page 1: "This book belongs to"
+      doc.setFontSize(22);
+      doc.text("THIS BOOK BELONGS TO", pageWidth / 2, pageHeight / 2, { align: 'center' });
+
       for (let i = 0; i < pages.length; i++) {
+        // Add a page for the coloring image itself
+        doc.addPage([pageWidth, pageHeight], pageWidth > pageHeight ? 'landscape' : 'portrait');
+        
         const page = pages[i];
         const imgData = page.imageUrl;
         const margin = 0.5;
@@ -101,13 +108,10 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
         const imageHeight = pageHeight - margin * 2;
         const x = margin;
         const y = margin;
-
-        if (i > 0) {
-          doc.addPage([pageWidth, pageHeight], pageWidth > pageHeight ? 'landscape' : 'portrait');
-        }
         
         doc.addImage(imgData, 'PNG', x, y, imageWidth, imageHeight);
         
+        // Add a blank page after the coloring page if requested
         if (addBlankPages) {
           doc.addPage([pageWidth, pageHeight], pageWidth > pageHeight ? 'landscape' : 'portrait');
         }
@@ -138,6 +142,18 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div
+                className={cn(
+                    "rounded-lg border bg-card p-2 shadow-sm flex flex-col items-center justify-center"
+                )}
+            >
+                <div className="flex justify-between items-center mb-2 w-full">
+                    <span className="font-bold text-lg">1</span>
+                </div>
+                <div className="aspect-square relative w-full bg-muted/50 rounded-md overflow-hidden flex items-center justify-center text-center p-4">
+                    <p className="font-semibold text-muted-foreground">THIS BOOK BELONGS TO</p>
+                </div>
+            </div>
             {pages.map((page, index) => (
               <div
                 key={page.id}
@@ -152,7 +168,7 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
                 )}
               >
                 <div className="flex justify-between items-center mb-2">
-                  <span className="font-bold text-lg">{index + 1}</span>
+                  <span className="font-bold text-lg">{index + 2}</span>
                   <GripVertical className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div className="aspect-square relative w-full bg-muted/50 rounded-md overflow-hidden">
