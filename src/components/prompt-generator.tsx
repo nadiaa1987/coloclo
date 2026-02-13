@@ -12,12 +12,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { generatePromptsAction } from "@/app/actions";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const formSchema = z.object({
   topic: z.string().min(3, "Topic must be at least 3 characters long."),
   count: z.coerce.number().int().min(1, "You must generate at least 1 page.").max(20, "You can generate a maximum of 20 pages at a time."),
   size: z.string(),
   style: z.string(),
+  bleed: z.string(),
 });
 
 type PromptGeneratorProps = {
@@ -34,6 +36,7 @@ export function PromptGenerator({ onPromptsGenerated }: PromptGeneratorProps) {
       count: 5,
       size: "8.5x11",
       style: "Coco Wyo",
+      bleed: "no-bleed",
     },
   });
 
@@ -227,6 +230,42 @@ export function PromptGenerator({ onPromptsGenerated }: PromptGeneratorProps) {
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="bleed"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>KDP Bleed</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="flex items-center space-x-4"
+                    >
+                      <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="no-bleed" />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          No Bleed
+                        </FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="bleed" />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Bleed
+                        </FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
             <Button type="submit" size="lg" className="w-full text-lg" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
