@@ -23,7 +23,7 @@ const formSchema = z.object({
 });
 
 type PromptGeneratorProps = {
-  onPromptsGenerated: (prompts: string[], topic: string) => void;
+  onPromptsGenerated: (prompts: string[], topic: string, settings: { size: string, bleed: string }) => void;
 };
 
 export function PromptGenerator({ onPromptsGenerated }: PromptGeneratorProps) {
@@ -54,7 +54,7 @@ export function PromptGenerator({ onPromptsGenerated }: PromptGeneratorProps) {
         title: "Prompts Generated!",
         description: `Successfully generated ${result.prompts.length} prompts. Now generating images.`,
       });
-      onPromptsGenerated(result.prompts, values.topic);
+      onPromptsGenerated(result.prompts, values.topic, { size: values.size, bleed: values.bleed });
     } else {
       toast({
         variant: "destructive",

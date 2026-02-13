@@ -11,15 +11,22 @@ type ImageResult = {
   prompt: string;
 };
 
+type KdpSettings = {
+  size: string;
+  bleed: string;
+};
+
 export default function Home() {
   const [step, setStep] = useState<'prompt' | 'image' | 'order'>('prompt');
   const [prompts, setPrompts] = useState<string[]>([]);
   const [topic, setTopic] = useState<string>('');
   const [finalImages, setFinalImages] = useState<ImageResult[]>([]);
+  const [kdpSettings, setKdpSettings] = useState<KdpSettings>({ size: '8.5x11', bleed: 'no-bleed' });
 
-  const handlePromptsGenerated = (generatedPrompts: string[], bookTopic: string) => {
+  const handlePromptsGenerated = (generatedPrompts: string[], bookTopic: string, settings: KdpSettings) => {
     setPrompts(generatedPrompts);
     setTopic(bookTopic);
+    setKdpSettings(settings);
     setStep('image');
   };
 
@@ -59,6 +66,7 @@ export default function Home() {
           initialImages={finalImages}
           bookTopic={topic}
           onBack={handleBackToImages}
+          kdpSettings={kdpSettings}
         />
       )}
     </main>

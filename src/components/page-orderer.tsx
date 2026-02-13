@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ArrowLeft, GripVertical } from "lucide-react";
+import { ArrowLeft, Book, Download, GripVertical, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import jsPDF from "jspdf";
 
 type ImageResult = {
   id: string;
@@ -17,11 +19,17 @@ type PageOrdererProps = {
   initialImages: ImageResult[];
   onBack: () => void;
   bookTopic?: string;
+  kdpSettings: {
+    size: string;
+    bleed: string;
+  };
 };
 
-export function PageOrderer({ initialImages, onBack, bookTopic }: PageOrdererProps) {
+export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: PageOrdererProps) {
   const [pages, setPages] = useState<ImageResult[]>(initialImages);
   const [draggingItem, setDraggingItem] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const { toast } = useToast();
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
     e.dataTransfer.effectAllowed = 'move';
@@ -54,6 +62,58 @@ export function PageOrderer({ initialImages, onBack, bookTopic }: PageOrdererPro
   
   const handleDragEnd = () => {
     setDraggingItem(null);
+  };
+
+  const handleDownloadPdf = async () => {
+    setIsDownloading(true);
+    toast({ title: "Preparing PDF...", description: "Your coloring book is being generated." });
+
+    try {
+      const dimensions: { [key: string]: { width: number; height: number } } = {
+        '8.5x11': { width: 8.5, height: 11 },
+        '6x9': { width: 6, height: 9 },
+        '8.25x8.25': { width: 8.25, height: 8.25 },
+      };
+
+      const { size, bleed } = kdpSettings;
+      let pageWidth = dimensions[size]?.width || 8.5;
+      let pageHeight = dimensions[size]?.height || 11;
+
+      if (bleed === 'bleed') {
+        pageWidth += 0.125;
+        pageHeight += 0.25;
+      }
+
+      const doc = new jsPDF({
+        orientation: pageWidth > pageHeight ? 'landscape' : 'portrait',
+        unit: 'in',
+        format: [pageWidth, pageHeight],
+      });
+
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i];
+        const imgData = page.imageUrl;
+        const margin = 0.5;
+        const imageWidth = pageWidth - margin * 2;
+        const imageHeight = pageHeight - margin * 2;
+        const x = margin;
+        const y = margin;
+
+        if (i > 0) {
+          doc.addPage([pageWidth, pageHeight], pageWidth > pageHeight ? 'landscape' : 'portrait');
+        }
+        
+        doc.addImage(imgData, 'PNG', x, y, imageWidth, imageHeight);
+      }
+      
+      doc.save(`${bookTopic?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'coloring_book'}.pdf`);
+      toast({ title: "Download started!", description: "Your PDF book is being downloaded." });
+    } catch(error) {
+      console.error(error);
+      toast({ variant: "destructive", title: "Uh oh! Something went wrong.", description: "Could not generate the PDF." });
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -101,8 +161,19 @@ export function PageOrderer({ initialImages, onBack, bookTopic }: PageOrdererPro
               </div>
             ))}
           </div>
-          <div className="mt-8 flex justify-end">
-              <Button size="lg" disabled>Download Book (Coming Soon)</Button>
+          <div className="mt-8 flex justify-end gap-2">
+            <Button size="lg" onClick={handleDownloadPdf} disabled={isDownloading}>
+              {isDownloading ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                <Download className="mr-2 h-5 w-5" />
+              )}
+              Download PDF
+            </Button>
+            <Button size="lg" disabled>
+              <Book className="mr-2 h-5 w-5" />
+              Download EPUB (Coming Soon)
+            </Button>
           </div>
         </CardContent>
       </Card>
