@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { ArrowLeft, Book, Download, GripVertical, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,8 @@ type TitlePageSettings = {
   fontSize: number;
   fontFamily: string;
   textAlign: "left" | "center" | "right";
+  x: number;
+  y: number;
 };
 
 export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: PageOrdererProps) {
@@ -58,12 +60,17 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
   const [isDownloading, setIsDownloading] = useState(false);
   const [addBlankPages, setAddBlankPages] = useState(false);
   const { toast } = useToast();
+  
+  const [isDraggingTitle, setIsDraggingTitle] = useState(false);
+  const titlePageContainerRef = useRef<HTMLDivElement>(null);
 
   const [titlePageSettings, setTitlePageSettings] = useState<TitlePageSettings>({
     text: "THIS BOOK BELONGS TO",
     fontSize: 22,
     fontFamily: "helvetica",
     textAlign: "center",
+    x: 50,
+    y: 50,
   });
 
   const [editingTitlePageSettings, setEditingTitlePageSettings] = useState<TitlePageSettings>(titlePageSettings);
@@ -101,6 +108,46 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
     setDraggingItem(null);
   };
 
+  const handleTitleDragStart = (e: React.MouseEvent<HTMLParagraphElement>) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setIsDraggingTitle(true);
+  };
+
+  const handleTitleDragMove = (e: MouseEvent) => {
+    if (!isDraggingTitle || !titlePageContainerRef.current) return;
+    e.preventDefault();
+
+    const rect = titlePageContainerRef.current.getBoundingClientRect();
+    const newX = ((e.clientX - rect.left) / rect.width) * 100;
+    const newY = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    const clampedX = Math.max(0, Math.min(100, newX));
+    const clampedY = Math.max(0, Math.min(100, newY));
+
+    setTitlePageSettings(prev => ({ ...prev, x: clampedX, y: clampedY }));
+  };
+
+  const handleTitleDragEnd = () => {
+    setIsDraggingTitle(false);
+  };
+
+  useEffect(() => {
+    if (isDraggingTitle) {
+      window.addEventListener('mousemove', handleTitleDragMove);
+      window.addEventListener('mouseup', handleTitleDragEnd);
+    } else {
+      window.removeEventListener('mousemove', handleTitleDragMove);
+      window.removeEventListener('mouseup', handleTitleDragEnd);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleTitleDragMove);
+      window.removeEventListener('mouseup', handleTitleDragEnd);
+    };
+  }, [isDraggingTitle]);
+
+
   const handleDownloadPdf = async () => {
     setIsDownloading(true);
     toast({ title: "Preparing PDF...", description: "Your coloring book is being generated." });
@@ -128,20 +175,16 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
       });
 
       // Page 1: "This book belongs to"
-      const { text, fontSize, fontFamily, textAlign } = titlePageSettings;
+      const { text, fontSize, fontFamily, textAlign, x: textX, y: textY } = titlePageSettings;
       const margin = 0.5;
 
       doc.setFont(fontFamily, 'normal');
       doc.setFontSize(fontSize);
       
-      let xPos = pageWidth / 2; // Default for center
-      if (textAlign === 'left') {
-          xPos = margin;
-      } else if (textAlign === 'right') {
-          xPos = pageWidth - margin;
-      }
+      const xPos = pageWidth * (textX / 100);
+      const yPos = pageHeight * (textY / 100);
 
-      doc.text(text, xPos, pageHeight / 2, { align: textAlign, baseline: 'middle' });
+      doc.text(text, xPos, yPos, { align: textAlign, baseline: 'middle' });
 
 
       for (let i = 0; i < pages.length; i++) {
@@ -202,11 +245,15 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
                     <div className="flex justify-between items-center mb-2 w-full">
                         <span className="font-bold text-lg">1</span>
                     </div>
-                    <div className="aspect-square relative w-full bg-muted/50 rounded-md overflow-hidden flex items-center justify-center text-center p-4">
+                    <div ref={titlePageContainerRef} className="aspect-square relative w-full bg-muted/50 rounded-md overflow-hidden">
                         <p 
-                          className="font-semibold text-muted-foreground break-words"
+                          onMouseDown={handleTitleDragStart}
+                          className="font-semibold text-muted-foreground break-words absolute cursor-move select-none"
                           style={{
                             fontSize: `${Math.min(titlePageSettings.fontSize, 32)}px`,
+                            left: `${titlePageSettings.x}%`,
+                            top: `${titlePageSettings.y}%`,
+                            transform: `translate(-${titlePageSettings.textAlign === 'center' ? 50 : titlePageSettings.textAlign === 'right' ? 100 : 0}%, -50%)`,
                             textAlign: titlePageSettings.textAlign,
                             lineHeight: 1.2
                           }}
