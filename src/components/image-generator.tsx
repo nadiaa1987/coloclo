@@ -8,40 +8,65 @@ import Image from "next/image";
 import { Wand2, Download, Image as ImageIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { generateImageAction } from "@/app/actions";
+import { generateBulkImagesAction } from "@/app/actions";
 
 const formSchema = z.object({
-  prompt: z.string().min(1, "Prompt is required."),
+  prompts: z.string().min(1, "At least one prompt is required."),
 });
 
+type ImageResult = {
+  imageUrl: string;
+  prompt: string;
+};
+
 export function ImageGenerator() {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageResults, setImageResults] = useState<ImageResult[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      prompt: "A cute unicorn in a magical forest",
+      prompts: "A cute unicorn in a magical forest\nA happy robot waving",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    setImageUrl(null);
+    setImageResults(null);
+    const prompts = values.prompts.split('\n').map(p => p.trim()).filter(p => p.length > 0);
+
+    if (prompts.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No prompts provided",
+        description: "Please enter at least one prompt, one per line.",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const result = await generateImageAction({ prompt: values.prompt });
-      if (result.success && result.imageUrl) {
-        setImageUrl(result.imageUrl);
-      } else {
+      const results = await generateBulkImagesAction({ prompts });
+      
+      const successfulResults = results
+        .filter(r => r.success && r.imageUrl)
+        .map(r => ({ imageUrl: r.imageUrl!, prompt: r.prompt }));
+
+      if(successfulResults.length > 0) {
+        setImageResults(successfulResults);
+      }
+
+      const failedResults = results.filter(r => !r.success);
+      if (failedResults.length > 0) {
         toast({
           variant: "destructive",
-          title: "Image generation failed",
-          description: result.error || "An unknown error occurred.",
+          title: `${failedResults.length} image(s) failed to generate`,
+          description: `The following prompts failed: ${failedResults.map(r => `"${r.prompt}"`).join(', ')}`,
         });
       }
     } catch (error) {
@@ -55,11 +80,12 @@ export function ImageGenerator() {
     }
   }
 
-  const handleDownload = () => {
+  const handleDownload = (imageUrl: string, prompt: string) => {
     if (imageUrl) {
       const link = document.createElement('a');
       link.href = imageUrl;
-      link.download = `generated-image-${form.getValues('prompt').replace(/\s/g, '-')}.png`;
+      const safePrompt = prompt.replace(/[^a-z0-9]/gi, '_').toLowerCase().slice(0, 50);
+      link.download = `coloring-page-${safePrompt}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -68,14 +94,14 @@ export function ImageGenerator() {
 
   return (
     <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <Card className="max-w-2xl mx-auto shadow-lg rounded-xl">
+      <Card className="max-w-6xl mx-auto shadow-lg rounded-xl">
         <CardHeader className="text-center">
           <div className="inline-flex items-center justify-center gap-2 mx-auto">
              <Wand2 className="h-8 w-8 text-primary" />
             <CardTitle className="text-4xl font-headline tracking-tighter">AI Coloring Book Page Generator</CardTitle>
           </div>
           <CardDescription className="pt-2">
-            Turn your text prompts into coloring book pages for KDP.
+            Turn your text prompts into coloring book pages for KDP. Enter one prompt per line.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -83,14 +109,14 @@ export function ImageGenerator() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
-                name="prompt"
+                name="prompts"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="sr-only">Prompt</FormLabel>
+                    <FormLabel className="sr-only">Prompts</FormLabel>
                     <FormControl>
-                      <Input
-                        className="text-base"
-                        placeholder="e.g., A cute cat wearing a wizard hat"
+                      <Textarea
+                        className="text-base min-h-[120px]"
+                        placeholder="e.g., A cute cat wearing a wizard hat&#10;An astronaut dog on the moon"
                         {...field}
                       />
                     </FormControl>
@@ -110,7 +136,7 @@ export function ImageGenerator() {
                 ) : (
                   <>
                     <Wand2 className="mr-2 h-5 w-5" />
-                    Generate Image
+                    Generate Images
                   </>
                 )}
               </Button>
@@ -118,37 +144,46 @@ export function ImageGenerator() {
           </Form>
 
           <div className="mt-8">
-            <div className="aspect-square relative w-full bg-muted/50 rounded-lg overflow-hidden border-2 border-dashed flex items-center justify-center text-muted-foreground">
-              {isLoading && (
-                <div className="flex flex-col items-center gap-4 text-center">
-                  <div className="w-12 h-12 border-4 border-dashed rounded-full animate-spin border-primary"></div>
-                  <p className="font-medium">Your vision is being generated...</p>
-                  <p className="text-sm text-muted-foreground">This may take a moment.</p>
-                </div>
-              )}
-              {!isLoading && !imageUrl && (
+            {isLoading && (
+              <div className="flex flex-col items-center gap-4 text-center">
+                <div className="w-12 h-12 border-4 border-dashed rounded-full animate-spin border-primary"></div>
+                <p className="font-medium">Your visions are being illustrated...</p>
+                <p className="text-sm text-muted-foreground">This may take a moment.</p>
+              </div>
+            )}
+            {!isLoading && (!imageResults || imageResults.length === 0) && (
+              <div className="aspect-video relative w-full bg-muted/50 rounded-lg overflow-hidden border-2 border-dashed flex items-center justify-center text-muted-foreground">
                 <div className="flex flex-col items-center gap-2 text-center">
                   <ImageIcon className="h-12 w-12" />
-                  <p className="font-medium">Your generated image will appear here</p>
+                  <p className="font-medium">Your generated images will appear here</p>
                 </div>
-              )}
-              {imageUrl && (
-                <Image
-                  src={imageUrl}
-                  alt={form.getValues('prompt')}
-                  fill
-                  className="object-contain"
-                  data-ai-hint="generated image"
-                  unoptimized
-                />
-              )}
-            </div>
-            {imageUrl && !isLoading && (
-              <div className="mt-4 flex justify-center">
-                <Button onClick={handleDownload} variant="secondary">
-                  <Download className="mr-2 h-4 w-4" />
-                  Download Image
-                </Button>
+              </div>
+            )}
+            {imageResults && imageResults.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {imageResults.map((result, index) => (
+                  <Card key={index} className="overflow-hidden flex flex-col">
+                    <CardContent className="p-0">
+                      <div className="aspect-square relative w-full bg-muted/50">
+                        <Image
+                          src={result.imageUrl}
+                          alt={result.prompt}
+                          fill
+                          className="object-contain"
+                          data-ai-hint="generated coloring page"
+                          unoptimized
+                        />
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex-col items-start gap-2 p-4">
+                       <p className="text-sm text-muted-foreground truncate w-full" title={result.prompt}>"{result.prompt}"</p>
+                        <Button onClick={() => handleDownload(result.imageUrl, result.prompt)} variant="secondary" className="w-full">
+                          <Download className="mr-2 h-4 w-4" />
+                          Download
+                        </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
               </div>
             )}
           </div>
