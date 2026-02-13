@@ -30,17 +30,6 @@ export async function generatePrompts(
   return generatePromptsFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'generateColoringPrompts',
-  input: { schema: GeneratePromptsInputSchema },
-  output: { schema: GeneratePromptsOutputSchema },
-  prompt: `You are an expert at creating engaging prompts for coloring book pages.
-Generate {{count}} unique and descriptive prompts based on the topic: '{{topic}}'.
-Each prompt should describe a scene that would make a great black and white coloring page for kids or adults.
-Focus on clear, simple, and imaginative scenes. Avoid overly complex or abstract ideas.`,
-});
-
-
 const generatePromptsFlow = ai.defineFlow(
   {
     name: 'generatePromptsFlow',
@@ -48,7 +37,44 @@ const generatePromptsFlow = ai.defineFlow(
     outputSchema: GeneratePromptsOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
-    return output!;
+    const textGenerationPrompt = `You are an expert at creating engaging prompts for coloring book pages.
+Generate ${input.count} unique and descriptive prompts based on the topic: '${input.topic}'.
+Each prompt should describe a scene that would make a great black and white coloring page for kids or adults.
+Focus on clear, simple, and imaginative scenes. Avoid overly complex or abstract ideas.
+The output should be only the list of prompts, each on a new line.`;
+    
+    const encodedPrompt = encodeURIComponent(textGenerationPrompt);
+    const url = `https://gen.pollinations.ai/text/${encodedPrompt}?model=gemini-fast&key=sk_UOsZKtGMSYNskyHUmwbWTQEdYPKv2UxR`;
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch prompts from Pollinations AI: ${response.statusText}`);
+    }
+
+    const responseText = await response.text();
+    let promptsList: string[] = [];
+
+    try {
+      // Pollinations.ai can return a JSON object with an 'output' field
+      const data = JSON.parse(responseText);
+      if (data && data.output && typeof data.output === 'string') {
+        promptsList = data.output.split('\n');
+      } else {
+        // Or it might be a plain string in the response
+        promptsList = responseText.split('\n');
+      }
+    } catch (error) {
+      // If parsing fails, assume it's a plain text response with newlines
+      promptsList = responseText.split('\n');
+    }
+    
+    const prompts = promptsList
+      .map(p => p.trim())
+      .filter(p => p.length > 0)
+      // Remove any list numbering like "1. " or "- "
+      .map(p => p.replace(/^\s*(\d+\.|-)\s*/, ''));
+
+    return { prompts };
   }
 );
