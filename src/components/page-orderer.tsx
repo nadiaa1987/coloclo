@@ -98,7 +98,6 @@ export function PageOrderer({ initialImages, onBack, bookTopic }: PageOrdererPro
                         unoptimized
                     />
                 </div>
-                <p className="text-xs text-muted-foreground mt-2 truncate" title={page.prompt}>{page.prompt}</p>
               </div>
             ))}
           </div>
