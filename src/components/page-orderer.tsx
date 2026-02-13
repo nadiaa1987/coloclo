@@ -108,13 +108,13 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
     setDraggingItem(null);
   };
 
-  const handleTitleDragStart = (e: React.MouseEvent<HTMLParagraphElement>) => {
+  const handleTitleDragStart = (e: React.PointerEvent<HTMLParagraphElement>) => {
     e.stopPropagation();
     e.preventDefault();
     setIsDraggingTitle(true);
   };
 
-  const handleTitleDragMove = (e: MouseEvent) => {
+  const handleTitleDragMove = (e: PointerEvent) => {
     if (!isDraggingTitle || !titlePageContainerRef.current) return;
     e.preventDefault();
 
@@ -134,16 +134,16 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
 
   useEffect(() => {
     if (isDraggingTitle) {
-      window.addEventListener('mousemove', handleTitleDragMove);
-      window.addEventListener('mouseup', handleTitleDragEnd);
+      window.addEventListener('pointermove', handleTitleDragMove);
+      window.addEventListener('pointerup', handleTitleDragEnd);
     } else {
-      window.removeEventListener('mousemove', handleTitleDragMove);
-      window.removeEventListener('mouseup', handleTitleDragEnd);
+      window.removeEventListener('pointermove', handleTitleDragMove);
+      window.removeEventListener('pointerup', handleTitleDragEnd);
     }
 
     return () => {
-      window.removeEventListener('mousemove', handleTitleDragMove);
-      window.removeEventListener('mouseup', handleTitleDragEnd);
+      window.removeEventListener('pointermove', handleTitleDragMove);
+      window.removeEventListener('pointerup', handleTitleDragEnd);
     };
   }, [isDraggingTitle]);
 
@@ -247,7 +247,7 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
                     </div>
                     <div ref={titlePageContainerRef} className="aspect-square relative w-full bg-muted/50 rounded-md overflow-hidden">
                         <p 
-                          onMouseDown={handleTitleDragStart}
+                          onPointerDown={handleTitleDragStart}
                           className="font-semibold text-muted-foreground break-words absolute cursor-move select-none"
                           style={{
                             fontSize: `${Math.min(titlePageSettings.fontSize, 32)}px`,
