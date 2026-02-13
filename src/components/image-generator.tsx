@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { generateBulkImagesAction, regenerateImageAction } from "@/app/actions";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 const formSchema = z.object({
   prompts: z.string().min(1, "At least one prompt is required."),
@@ -220,21 +221,37 @@ export function ImageGenerator({ initialPrompts, bookTopic, onBack }: ImageGener
                   return (
                     <Card key={result.id} className="overflow-hidden flex flex-col">
                       <CardContent className="p-0">
-                        <div className="aspect-square relative w-full bg-muted/50">
-                          {isRegenerating && (
-                             <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50">
-                               <Loader2 className="h-8 w-8 animate-spin text-white" />
-                             </div>
-                          )}
-                          <Image
-                            src={result.imageUrl}
-                            alt={result.prompt}
-                            fill
-                            className="object-contain"
-                            data-ai-hint="generated coloring page"
-                            unoptimized
-                          />
-                        </div>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <div className="aspect-square relative w-full bg-muted/50 cursor-pointer">
+                              {isRegenerating && (
+                                <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50">
+                                  <Loader2 className="h-8 w-8 animate-spin text-white" />
+                                </div>
+                              )}
+                              <Image
+                                src={result.imageUrl}
+                                alt={result.prompt}
+                                fill
+                                className="object-contain"
+                                data-ai-hint="generated coloring page"
+                                unoptimized
+                              />
+                            </div>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-3xl p-2">
+                             <div className="aspect-square relative w-full">
+                                <Image
+                                    src={result.imageUrl}
+                                    alt={result.prompt}
+                                    fill
+                                    className="object-contain rounded-md"
+                                    data-ai-hint="generated coloring page"
+                                    unoptimized
+                                />
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </CardContent>
                       <CardFooter className="flex-col items-start gap-2 p-4">
                         <Input
