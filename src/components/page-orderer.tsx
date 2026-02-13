@@ -10,6 +10,24 @@ import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 type ImageResult = {
   id: string;
@@ -27,12 +45,28 @@ type PageOrdererProps = {
   };
 };
 
+type TitlePageSettings = {
+  text: string;
+  fontSize: number;
+  fontFamily: string;
+  textAlign: "left" | "center" | "right";
+};
+
 export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: PageOrdererProps) {
   const [pages, setPages] = useState<ImageResult[]>(initialImages);
   const [draggingItem, setDraggingItem] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [addBlankPages, setAddBlankPages] = useState(false);
   const { toast } = useToast();
+
+  const [titlePageSettings, setTitlePageSettings] = useState<TitlePageSettings>({
+    text: "THIS BOOK BELONGS TO",
+    fontSize: 22,
+    fontFamily: "helvetica",
+    textAlign: "center",
+  });
+
+  const [editingTitlePageSettings, setEditingTitlePageSettings] = useState<TitlePageSettings>(titlePageSettings);
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
     e.dataTransfer.effectAllowed = 'move';
@@ -94,8 +128,21 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
       });
 
       // Page 1: "This book belongs to"
-      doc.setFontSize(22);
-      doc.text("THIS BOOK BELONGS TO", pageWidth / 2, pageHeight / 2, { align: 'center' });
+      const { text, fontSize, fontFamily, textAlign } = titlePageSettings;
+      const margin = 0.5;
+
+      doc.setFont(fontFamily, 'normal');
+      doc.setFontSize(fontSize);
+      
+      let xPos = pageWidth / 2; // Default for center
+      if (textAlign === 'left') {
+          xPos = margin;
+      } else if (textAlign === 'right') {
+          xPos = pageWidth - margin;
+      }
+
+      doc.text(text, xPos, pageHeight / 2, { align: textAlign, baseline: 'middle' });
+
 
       for (let i = 0; i < pages.length; i++) {
         // Add a page for the coloring image itself
@@ -103,7 +150,6 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
         
         const page = pages[i];
         const imgData = page.imageUrl;
-        const margin = 0.5;
         const imageWidth = pageWidth - margin * 2;
         const imageHeight = pageHeight - margin * 2;
         const x = margin;
@@ -137,23 +183,122 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
         <CardHeader className="text-center">
             <CardTitle className="text-4xl font-headline tracking-tighter">Arrange Your Coloring Book</CardTitle>
           <CardDescription className="pt-2">
-            Drag and drop the pages to set the order for your book: "{bookTopic}".
+            Drag and drop the pages to set the order for your book: "{bookTopic}". Click the first page to edit it.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <div
-                className={cn(
-                    "rounded-lg border bg-card p-2 shadow-sm flex flex-col items-center justify-center"
-                )}
-            >
-                <div className="flex justify-between items-center mb-2 w-full">
-                    <span className="font-bold text-lg">1</span>
+            <Dialog onOpenChange={(isOpen) => {
+              if (isOpen) {
+                setEditingTitlePageSettings(titlePageSettings);
+              }
+            }}>
+              <DialogTrigger asChild>
+                <div
+                    className={cn(
+                        "rounded-lg border bg-card p-2 shadow-sm flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors"
+                    )}
+                >
+                    <div className="flex justify-between items-center mb-2 w-full">
+                        <span className="font-bold text-lg">1</span>
+                    </div>
+                    <div className="aspect-square relative w-full bg-muted/50 rounded-md overflow-hidden flex items-center justify-center text-center p-4">
+                        <p 
+                          className="font-semibold text-muted-foreground break-words"
+                          style={{
+                            fontSize: `${Math.min(titlePageSettings.fontSize, 32)}px`,
+                            textAlign: titlePageSettings.textAlign,
+                            lineHeight: 1.2
+                          }}
+                        >
+                          {titlePageSettings.text}
+                        </p>
+                    </div>
                 </div>
-                <div className="aspect-square relative w-full bg-muted/50 rounded-md overflow-hidden flex items-center justify-center text-center p-4">
-                    <p className="font-semibold text-muted-foreground">THIS BOOK BELONGS TO</p>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Edit Title Page</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="text" className="text-right">
+                      Text
+                    </Label>
+                    <Input
+                      id="text"
+                      value={editingTitlePageSettings.text}
+                      onChange={(e) => setEditingTitlePageSettings({ ...editingTitlePageSettings, text: e.target.value })}
+                      className="col-span-3"
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="fontSize" className="text-right">
+                      Font Size
+                    </Label>
+                    <Input
+                      id="fontSize"
+                      type="number"
+                      value={editingTitlePageSettings.fontSize}
+                      onChange={(e) => setEditingTitlePageSettings({ ...editingTitlePageSettings, fontSize: Number(e.target.value) })}
+                      className="col-span-3"
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="fontFamily" className="text-right">
+                      Font
+                    </Label>
+                    <Select
+                        value={editingTitlePageSettings.fontFamily}
+                        onValueChange={(value) => setEditingTitlePageSettings({ ...editingTitlePageSettings, fontFamily: value })}
+                      >
+                      <SelectTrigger className="col-span-3">
+                        <SelectValue placeholder="Select a font" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="helvetica">Helvetica</SelectItem>
+                        <SelectItem value="times">Times New Roman</SelectItem>
+                        <SelectItem value="courier">Courier</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right">Alignment</Label>
+                    <RadioGroup
+                      value={editingTitlePageSettings.textAlign}
+                      onValueChange={(value: string) => {
+                          if (value) {
+                             setEditingTitlePageSettings({ ...editingTitlePageSettings, textAlign: value as "left" | "center" | "right" })
+                          }
+                        }
+                      }
+      
+                      className="col-span-3 flex space-x-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="left" id="align-left" />
+                        <Label htmlFor="align-left" className="font-normal">Left</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="center" id="align-center" />
+                        <Label htmlFor="align-center" className="font-normal">Center</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="right" id="align-right" />
+                        <Label htmlFor="align-right" className="font-normal">Right</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
                 </div>
-            </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type="button" onClick={() => setTitlePageSettings(editingTitlePageSettings)}>
+                      Save changes
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             {pages.map((page, index) => (
               <div
                 key={page.id}
