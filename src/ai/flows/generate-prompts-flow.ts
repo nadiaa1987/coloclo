@@ -14,6 +14,7 @@ import { z } from 'genkit';
 const GeneratePromptsInputSchema = z.object({
   topic: z.string().describe('The central theme or topic for the coloring book pages.'),
   count: z.number().int().min(1).max(50).describe('The number of prompts to generate.'),
+  style: z.string().describe('The artistic style for the coloring book pages.'),
 });
 export type GeneratePromptsInput = z.infer<typeof GeneratePromptsInputSchema>;
 
@@ -39,6 +40,7 @@ const generatePromptsFlow = ai.defineFlow(
   async (input) => {
     const textGenerationPrompt = `You are an expert at creating engaging prompts for coloring book pages.
 Generate ${input.count} unique and descriptive prompts based on the topic: '${input.topic}'.
+Each prompt should be in the style of '${input.style}'.
 Each prompt should describe a scene that would make a great black and white coloring page for kids or adults.
 Focus on clear, simple, and imaginative scenes. Avoid overly complex or abstract ideas.
 The output should be only the list of prompts, each on a new line.`;
