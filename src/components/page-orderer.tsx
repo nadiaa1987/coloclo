@@ -363,15 +363,20 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
                   <span className="font-bold text-lg">{index + 2}</span>
                   <GripVertical className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <div className="aspect-square relative w-full bg-muted/50 rounded-md overflow-hidden">
-                    <Image
-                        src={page.imageUrl}
-                        alt={page.prompt}
-                        fill
-                        className="object-contain"
-                        data-ai-hint="generated coloring page"
-                        unoptimized
-                    />
+                <div className="flex-grow flex items-center gap-2">
+                    <div className="w-1/2 flex items-center justify-center p-1">
+                        <p className="text-xs text-muted-foreground break-words text-center">{page.prompt}</p>
+                    </div>
+                    <div className="w-1/2 aspect-square relative bg-muted/50 rounded-md overflow-hidden">
+                        <Image
+                            src={page.imageUrl}
+                            alt={page.prompt}
+                            fill
+                            className="object-contain"
+                            data-ai-hint="generated coloring page"
+                            unoptimized
+                        />
+                    </div>
                 </div>
               </div>
             ))}
