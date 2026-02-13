@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Image from "next/image";
-import { Wand2, Download, Image as ImageIcon, ArrowLeft, Loader2, RefreshCw } from "lucide-react";
+import { Wand2, Download, Image as ImageIcon, ArrowLeft, Loader2, RefreshCw, ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,9 +30,10 @@ type ImageGeneratorProps = {
   initialPrompts?: string[];
   bookTopic?: string;
   onBack: () => void;
+  onImagesGenerated: (images: ImageResult[]) => void;
 };
 
-export function ImageGenerator({ initialPrompts, bookTopic, onBack }: ImageGeneratorProps) {
+export function ImageGenerator({ initialPrompts, bookTopic, onBack, onImagesGenerated }: ImageGeneratorProps) {
   const [imageResults, setImageResults] = useState<ImageResult[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [regeneratingIds, setRegeneratingIds] = useState<string[]>([]);
@@ -174,7 +175,8 @@ export function ImageGenerator({ initialPrompts, bookTopic, onBack }: ImageGener
                     <FormControl>
                       <Textarea
                         className="text-base min-h-[120px]"
-                        placeholder="e.g., A cute cat wearing a wizard hat&#10;An astronaut dog on the moon"
+                        placeholder="e.g., A cute cat wearing a wizard hat
+An astronaut dog on the moon"
                         {...field}
                       />
                     </FormControl>
@@ -215,72 +217,80 @@ export function ImageGenerator({ initialPrompts, bookTopic, onBack }: ImageGener
               </div>
             )}
             {imageResults && imageResults.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {imageResults.map((result) => {
-                  const isRegenerating = regeneratingIds.includes(result.id);
-                  return (
-                    <Card key={result.id} className="overflow-hidden flex flex-col">
-                      <CardContent className="p-0">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <div className="aspect-square relative w-full bg-muted/50 cursor-pointer">
-                              {isRegenerating && (
-                                <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50">
-                                  <Loader2 className="h-8 w-8 animate-spin text-white" />
-                                </div>
-                              )}
-                              <Image
-                                src={result.imageUrl}
-                                alt={result.prompt}
-                                fill
-                                className="object-contain"
-                                data-ai-hint="generated coloring page"
-                                unoptimized
-                              />
-                            </div>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-3xl p-2">
-                             <DialogTitle className="sr-only">{result.prompt}</DialogTitle>
-                             <DialogDescription className="sr-only">An enlarged view of the generated image for the prompt: {result.prompt}</DialogDescription>
-                             <div className="aspect-square relative w-full">
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {imageResults.map((result) => {
+                    const isRegenerating = regeneratingIds.includes(result.id);
+                    return (
+                      <Card key={result.id} className="overflow-hidden flex flex-col">
+                        <CardContent className="p-0">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <div className="aspect-square relative w-full bg-muted/50 cursor-pointer">
+                                {isRegenerating && (
+                                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50">
+                                    <Loader2 className="h-8 w-8 animate-spin text-white" />
+                                  </div>
+                                )}
                                 <Image
-                                    src={result.imageUrl}
-                                    alt={result.prompt}
-                                    fill
-                                    className="object-contain rounded-md"
-                                    data-ai-hint="generated coloring page"
-                                    unoptimized
+                                  src={result.imageUrl}
+                                  alt={result.prompt}
+                                  fill
+                                  className="object-contain"
+                                  data-ai-hint="generated coloring page"
+                                  unoptimized
                                 />
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                      </CardContent>
-                      <CardFooter className="flex-col items-start gap-2 p-4">
-                        <Input
-                          value={result.prompt}
-                          onChange={(e) => handlePromptChange(result.id, e.target.value)}
-                          className="w-full"
-                          disabled={isRegenerating}
-                        />
-                        <div className="w-full grid grid-cols-2 gap-2">
-                           <Button onClick={() => handleRegenerate(result.id, result.prompt)} variant="secondary" className="w-full" disabled={isRegenerating}>
-                             {isRegenerating ? (
-                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                             ) : (
-                               <RefreshCw className="mr-2 h-4 w-4" />
-                             )}
-                             Regenerate
-                           </Button>
-                           <Button onClick={() => handleDownload(result.imageUrl, result.prompt)} className="w-full">
-                             <Download className="mr-2 h-4 w-4" />
-                             Download
-                           </Button>
-                        </div>
-                      </CardFooter>
-                    </Card>
-                  );
-                })}
-              </div>
+                              </div>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-3xl p-2">
+                              <DialogTitle className="sr-only">{result.prompt}</DialogTitle>
+                              <DialogDescription className="sr-only">An enlarged view of the generated image for the prompt: {result.prompt}</DialogDescription>
+                              <div className="aspect-square relative w-full">
+                                  <Image
+                                      src={result.imageUrl}
+                                      alt={result.prompt}
+                                      fill
+                                      className="object-contain rounded-md"
+                                      data-ai-hint="generated coloring page"
+                                      unoptimized
+                                  />
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </CardContent>
+                        <CardFooter className="flex-col items-start gap-2 p-4">
+                          <Input
+                            value={result.prompt}
+                            onChange={(e) => handlePromptChange(result.id, e.target.value)}
+                            className="w-full"
+                            disabled={isRegenerating}
+                          />
+                          <div className="w-full grid grid-cols-2 gap-2">
+                            <Button onClick={() => handleRegenerate(result.id, result.prompt)} variant="secondary" className="w-full" disabled={isRegenerating}>
+                              {isRegenerating ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <RefreshCw className="mr-2 h-4 w-4" />
+                              )}
+                              Regenerate
+                            </Button>
+                            <Button onClick={() => handleDownload(result.imageUrl, result.prompt)} className="w-full">
+                              <Download className="mr-2 h-4 w-4" />
+                              Download
+                            </Button>
+                          </div>
+                        </CardFooter>
+                      </Card>
+                    );
+                  })}
+                </div>
+                <div className="mt-8 flex justify-end">
+                  <Button size="lg" onClick={() => onImagesGenerated(imageResults)}>
+                    Next: Arrange Pages
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </div>
+              </>
             )}
           </div>
         </CardContent>

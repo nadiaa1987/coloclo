@@ -3,11 +3,19 @@
 import { useState } from 'react';
 import { ImageGenerator } from "@/components/image-generator";
 import { PromptGenerator } from "@/components/prompt-generator";
+import { PageOrderer } from '@/components/page-orderer';
+
+type ImageResult = {
+  id: string;
+  imageUrl: string;
+  prompt: string;
+};
 
 export default function Home() {
-  const [step, setStep] = useState<'prompt' | 'image'>('prompt');
+  const [step, setStep] = useState<'prompt' | 'image' | 'order'>('prompt');
   const [prompts, setPrompts] = useState<string[]>([]);
   const [topic, setTopic] = useState<string>('');
+  const [finalImages, setFinalImages] = useState<ImageResult[]>([]);
 
   const handlePromptsGenerated = (generatedPrompts: string[], bookTopic: string) => {
     setPrompts(generatedPrompts);
@@ -15,10 +23,20 @@ export default function Home() {
     setStep('image');
   };
 
-  const handleBack = () => {
+  const handleImagesGenerated = (images: ImageResult[]) => {
+    setFinalImages(images);
+    setStep('order');
+  }
+
+  const handleBackToPrompt = () => {
     setStep('prompt');
     setPrompts([]);
     setTopic('');
+    setFinalImages([]);
+  };
+
+  const handleBackToImages = () => {
+    setStep('image');
   };
 
   return (
@@ -32,7 +50,15 @@ export default function Home() {
         <ImageGenerator 
           initialPrompts={prompts}
           bookTopic={topic}
-          onBack={handleBack}
+          onBack={handleBackToPrompt}
+          onImagesGenerated={handleImagesGenerated}
+        />
+      )}
+      {step === 'order' && (
+        <PageOrderer
+          initialImages={finalImages}
+          bookTopic={topic}
+          onBack={handleBackToImages}
         />
       )}
     </main>
