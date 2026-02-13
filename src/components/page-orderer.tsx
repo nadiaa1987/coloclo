@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 type ImageResult = {
   id: string;
@@ -29,6 +31,7 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
   const [pages, setPages] = useState<ImageResult[]>(initialImages);
   const [draggingItem, setDraggingItem] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [addBlankPages, setAddBlankPages] = useState(false);
   const { toast } = useToast();
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
@@ -104,6 +107,10 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
         }
         
         doc.addImage(imgData, 'PNG', x, y, imageWidth, imageHeight);
+        
+        if (addBlankPages) {
+          doc.addPage([pageWidth, pageHeight], pageWidth > pageHeight ? 'landscape' : 'portrait');
+        }
       }
       
       doc.save(`${bookTopic?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'coloring_book'}.pdf`);
@@ -161,7 +168,11 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
               </div>
             ))}
           </div>
-          <div className="mt-8 flex justify-end gap-2">
+          <div className="flex items-center justify-end space-x-2 mt-8">
+            <Switch id="blank-pages" checked={addBlankPages} onCheckedChange={setAddBlankPages} />
+            <Label htmlFor="blank-pages" className="font-normal">Add blank page after each coloring page</Label>
+          </div>
+          <div className="mt-2 flex justify-end gap-2">
             <Button size="lg" onClick={handleDownloadPdf} disabled={isDownloading}>
               {isDownloading ? (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
