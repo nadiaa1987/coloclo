@@ -147,6 +147,15 @@ function LandingPage() {
       </main>
       <footer className="bg-background border-t py-12">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
+          <div className="flex justify-center mb-6">
+            <Image
+              src="https://raw.githubusercontent.com/nadiaa1987/coloclo/main/logo.png"
+              alt="Coco Wyo Logo"
+              width={140}
+              height={50}
+              className="object-contain"
+            />
+          </div>
           <p>&copy; {new Date().getFullYear()} AI Coloring Book Generator. All rights reserved.</p>
           <div className="mt-4 flex justify-center gap-x-6">
             <Link href="/legal" className="text-sm hover:underline">Legal</Link>

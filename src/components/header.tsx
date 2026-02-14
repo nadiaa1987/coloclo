@@ -1,9 +1,10 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, BookHeart, LogOut, LogIn } from 'lucide-react';
+import { Menu, LogOut, LogIn } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { getAuth, signOut } from 'firebase/auth';
 import { firebaseApp } from '@/lib/firebase';
@@ -40,8 +41,13 @@ export function Header() {
       <div className="container flex h-14 items-center">
         <div className="mr-4 flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <BookHeart className="h-6 w-6 text-primary" />
-            <span className="font-bold hidden sm:inline-block">AI Coloring Book Generator</span>
+            <Image
+              src="https://raw.githubusercontent.com/nadiaa1987/coloclo/main/logo.png"
+              alt="Coco Wyo Logo"
+              width={140}
+              height={40}
+              className="object-contain"
+            />
           </Link>
         </div>
         

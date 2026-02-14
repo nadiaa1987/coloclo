@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { getAuth, signOut } from 'firebase/auth';
 import { firebaseApp } from '@/lib/firebase';
@@ -22,7 +23,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { BookHeart, LayoutDashboard, Wand2, LifeBuoy, Mail, LogOut, Loader2, History } from 'lucide-react';
+import { LayoutDashboard, Wand2, LifeBuoy, Mail, LogOut, Loader2, History } from 'lucide-react';
 import { Header } from './header';
 
 const navItems = [
@@ -84,10 +85,15 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
       <SidebarProvider>
         <Sidebar>
           <SidebarHeader>
-            <div className="flex items-center gap-2">
-              <BookHeart className="h-7 w-7 text-primary" />
-              <h2 className="text-lg font-semibold tracking-tight">ColoringKit</h2>
-            </div>
+            <Link href="/" className="flex items-center justify-center p-2">
+                <Image
+                    src="https://raw.githubusercontent.com/nadiaa1987/coloclo/main/logo.png"
+                    alt="Coco Wyo Logo"
+                    width={150}
+                    height={60}
+                    className="object-contain transition-all duration-200 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:h-10"
+                />
+            </Link>
           </SidebarHeader>
           <SidebarContent>
             <SidebarMenu>
@@ -127,8 +133,13 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                 <div className="container flex h-14 items-center">
                     <SidebarTrigger className="mr-2" />
                     <Link href="/" className="flex items-center space-x-2">
-                      <BookHeart className="h-6 w-6 text-primary" />
-                      <span className="font-bold">ColoringKit</span>
+                        <Image
+                            src="https://raw.githubusercontent.com/nadiaa1987/coloclo/main/logo.png"
+                            alt="Coco Wyo Logo"
+                            width={120}
+                            height={40}
+                            className="object-contain"
+                        />
                     </Link>
                 </div>
             </header>
