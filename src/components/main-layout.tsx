@@ -22,11 +22,12 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { BookHeart, LayoutDashboard, Wand2, LifeBuoy, Star, Mail, LogOut, Loader2 } from 'lucide-react';
+import { BookHeart, LayoutDashboard, Wand2, LifeBuoy, Mail, LogOut, Loader2, History } from 'lucide-react';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/create', label: 'Generator', icon: Wand2 },
+  { href: '/history', label: 'History', icon: History },
   { href: '/contact', label: 'Contact', icon: Mail },
   { href: '/legal', label: 'Legal', icon: LifeBuoy },
 ];
