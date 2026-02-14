@@ -38,9 +38,8 @@ function LandingPage() {
                       alt="A collage of cute and cozy coloring book covers"
                       width={1024}
                       height={1024}
-                      className="object-cover w-full h-full"
+                      className="object-contain w-full h-full"
                       data-ai-hint="coloring book covers"
-                      priority
                     />
                 </div>
             </div>
