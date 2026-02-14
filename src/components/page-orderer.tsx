@@ -31,6 +31,8 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAuth } from "@/hooks/use-auth";
 import { saveBookAction } from "@/app/actions";
+import { storage } from "@/lib/firebase";
+import { ref, uploadString, getDownloadURL } from "firebase/storage";
 
 type ImageResult = {
   id: string;
@@ -235,23 +237,39 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
     }
 
     setIsSaving(true);
+    toast({ title: "Saving book...", description: "Uploading images to storage. This might take a moment." });
+
     try {
+      const pagesWithUrls = await Promise.all(
+        pages.map(async (page) => {
+          if (page.imageUrl.startsWith("http")) {
+            return page; // It's already a URL, no need to re-upload
+          }
+          const storageRef = ref(storage, `images/${user.uid}/${page.id}.png`);
+          const snapshot = await uploadString(storageRef, page.imageUrl, "data_url");
+          const downloadURL = await getDownloadURL(snapshot.ref);
+          return { ...page, imageUrl: downloadURL };
+        })
+      );
+
       const result = await saveBookAction({
         userId: user.uid,
         bookData: {
           name: bookName,
           topic: bookTopic || "",
-          pages: pages,
-          kdpSettings: kdpSettings,
-          titlePageSettings: titlePageSettings,
-        }
+          pages: pagesWithUrls,
+          kdpSettings,
+          titlePageSettings,
+        },
       });
+
       if (result.success) {
         toast({ title: "Book Saved!", description: `"${bookName}" has been saved to your history.` });
       } else {
         throw new Error(result.error);
       }
     } catch (error: any) {
+      console.error("Error saving book:", error);
       toast({ variant: "destructive", title: "Failed to save book.", description: error.message });
     } finally {
       setIsSaving(false);

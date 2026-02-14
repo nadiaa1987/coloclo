@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
 import { collection, query, onSnapshot, orderBy } from 'firebase/firestore';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Loader2, BookOpen } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { Loader2, BookOpen, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -83,21 +83,27 @@ export default function HistoryPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {books.map((book) => (
-            <Card key={book.id}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span className="truncate">{book.name}</span>
-                </CardTitle>
-                <CardDescription>Topic: {book.topic}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Created on: {book.createdAt?.toDate().toLocaleDateString()}
-                </p>
-              </CardContent>
-              {/* Maybe add a footer with actions later */}
-            </Card>
+            <Link href={`/history/${book.id}`} key={book.id}>
+              <Card className="h-full flex flex-col hover:border-primary transition-colors">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BookOpen className="h-5 w-5 text-primary flex-shrink-0" />
+                    <span className="truncate">{book.name}</span>
+                  </CardTitle>
+                  <CardDescription>Topic: {book.topic}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <p className="text-sm text-muted-foreground">
+                    Created on: {book.createdAt?.toDate().toLocaleDateString()}
+                  </p>
+                </CardContent>
+                <CardFooter>
+                    <p className="text-sm font-medium text-primary flex items-center">
+                        View Book <ArrowRight className="ml-2 h-4 w-4" />
+                    </p>
+                </CardFooter>
+              </Card>
+            </Link>
           ))}
         </div>
       )}
