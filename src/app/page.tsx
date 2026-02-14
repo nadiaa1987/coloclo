@@ -29,9 +29,6 @@ function LandingPage() {
                 <Button asChild size="lg" className="font-semibold px-8 py-6 text-base">
                   <Link href="/signup">Start Creating for Free</Link>
                 </Button>
-                <Button asChild variant="ghost" size="lg" className="font-semibold px-8 py-6 text-base">
-                  <Link href="#features">Explore Features</Link>
-                </Button>
               </div>
             </div>
             <div className="flex justify-center items-center">
