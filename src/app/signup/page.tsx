@@ -73,7 +73,7 @@ function SignupContent() {
       if (plan) {
         const result = await createCheckoutSessionAction({ userId: user.uid, plan });
         if (result.success && result.url) {
-          router.push(result.url);
+          window.location.href = result.url;
         } else {
           throw new Error(result.error || 'Failed to create checkout session.');
         }

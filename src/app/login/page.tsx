@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { firebaseApp } from "@/lib/firebase"; // We will create this file
+import { firebaseApp } from "@/lib/firebase";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -59,7 +59,7 @@ function LoginContent() {
       if (plan) {
         const result = await createCheckoutSessionAction({ userId: user.uid, plan });
         if (result.success && result.url) {
-          router.push(result.url);
+          window.location.href = result.url;
         } else {
           throw new Error(result.error || 'Failed to create checkout session.');
         }
