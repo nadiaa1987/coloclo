@@ -6,22 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Loader2, PlusSquare, History, HelpCircle, Activity, Paintbrush, BookOpen, Download, Star, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
 import React from "react";
 
-const imageUrls = [
-  "https://raw.githubusercontent.com/nadiaa1987/coloclo/main/1coc.png",
-  "https://raw.githubusercontent.com/nadiaa1987/coloclo/main/2coc.png",
-  "https://raw.githubusercontent.com/nadiaa1987/coloclo/main/3coc.png",
-  "https://raw.githubusercontent.com/nadiaa1987/coloclo/main/4coc.png",
-];
-
 function LandingPage() {
-  const plugin = React.useRef(
-    Autoplay({ delay: 2000, stopOnInteraction: true })
-  );
-
   return (
     <>
       <main>
@@ -45,30 +32,17 @@ function LandingPage() {
               </div>
             </div>
             <div className="flex justify-center items-center">
-              <Carousel
-                plugins={[plugin.current]}
-                className="w-full"
-                onMouseEnter={plugin.current.stop}
-                onMouseLeave={plugin.current.reset}
-              >
-                <CarouselContent>
-                  {imageUrls.map((url, index) => (
-                    <CarouselItem key={index}>
-                      <div className="aspect-video w-full overflow-hidden rounded-lg shadow-2xl">
-                        <Image
-                          src={url}
-                          alt={`Showcase image ${index + 1}`}
-                          width={1280}
-                          height={720}
-                          className="object-cover w-full h-full"
-                          data-ai-hint="application screenshot"
-                          priority={index === 0}
-                        />
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-              </Carousel>
+                <div className="aspect-square w-full overflow-hidden rounded-lg shadow-2xl">
+                    <Image
+                      src="https://raw.githubusercontent.com/nadiaa1987/coloclo/main/all.png"
+                      alt="A collage of cute and cozy coloring book covers"
+                      width={1024}
+                      height={1024}
+                      className="object-cover w-full h-full"
+                      data-ai-hint="coloring book covers"
+                      priority
+                    />
+                </div>
             </div>
           </div>
         </section>
