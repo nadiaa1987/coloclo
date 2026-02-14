@@ -5,8 +5,6 @@ import { generatePrompts, GeneratePromptsInput } from '@/ai/flows/generate-promp
 import { db } from '@/lib/firebase';
 import { stripe } from '@/lib/stripe';
 import { collection, serverTimestamp, writeBatch, doc, getDoc, updateDoc } from 'firebase/firestore';
-import { headers } from 'next/headers';
-import Stripe from 'stripe';
 
 export async function generatePromptsAction(
   input: GeneratePromptsInput
@@ -141,7 +139,7 @@ export async function createCheckoutSessionAction({
         throw new Error(`Price ID for ${plan} plan is not configured.`);
     }
 
-    const origin = headers().get('origin') || 'http://localhost:3000';
+    const origin = 'https://kdpcolo.netlify.app';
     
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: stripeCustomerId,
