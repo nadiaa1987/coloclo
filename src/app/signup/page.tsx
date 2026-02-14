@@ -48,8 +48,8 @@ function SignupContent() {
       await createUserWithEmailAndPassword(auth, values.email, values.password);
 
       toast({
-        title: "Account Created",
-        description: "You have successfully signed up!",
+        title: "Account Created!",
+        description: "Your account has been successfully created.",
       });
       
       router.push("/");
