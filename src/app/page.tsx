@@ -1,14 +1,49 @@
 "use client";
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, PlusSquare, History, HelpCircle, Activity, Paintbrush, BookOpen, Download, Star, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 import React from "react";
+import { createCheckoutSessionAction } from './actions';
+import { useToast } from '@/hooks/use-toast';
 
 function LandingPage() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isSubscribing, setIsSubscribing] = useState<'monthly' | 'yearly' | null>(null);
+
+  const handleSubscribe = async (plan: 'monthly' | 'yearly') => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    setIsSubscribing(plan);
+    
+    try {
+      const result = await createCheckoutSessionAction({ userId: user.uid, plan });
+      if (result.success && result.url) {
+        router.push(result.url);
+      } else {
+        throw new Error(result.error || 'Failed to create checkout session.');
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Subscription Error",
+        description: error.message,
+      });
+      setIsSubscribing(null);
+    }
+  };
+
+
   return (
     <>
       <main>
@@ -116,8 +151,8 @@ function LandingPage() {
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button asChild className="w-full">
-                    <Link href="/signup">Sign Up Now</Link>
+                  <Button className="w-full" onClick={() => handleSubscribe('monthly')} disabled={isSubscribing === 'monthly'}>
+                    {isSubscribing === 'monthly' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (user ? 'Subscribe Now' : 'Sign Up to Subscribe')}
                   </Button>
                 </CardFooter>
               </Card>
@@ -136,8 +171,8 @@ function LandingPage() {
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button asChild className="w-full" variant="outline">
-                    <Link href="/signup">Choose Yearly</Link>
+                  <Button className="w-full" variant="outline" onClick={() => handleSubscribe('yearly')} disabled={isSubscribing === 'yearly'}>
+                    {isSubscribing === 'yearly' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (user ? 'Subscribe Now' : 'Sign Up to Subscribe')}
                   </Button>
                 </CardFooter>
               </Card>

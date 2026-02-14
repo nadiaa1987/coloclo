@@ -56,6 +56,10 @@ export default function SignupPage() {
         createdAt: new Date(),
         dateend: null,
         totalGenerations: 0,
+        stripeCustomerId: null,
+        stripeSubscriptionId: null,
+        stripePriceId: null,
+        stripeCurrentPeriodEnd: null,
       });
 
       toast({
