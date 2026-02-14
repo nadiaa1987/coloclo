@@ -23,6 +23,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { BookHeart, LayoutDashboard, Wand2, LifeBuoy, Mail, LogOut, Loader2, History } from 'lucide-react';
+import { Header } from './header';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -40,8 +41,8 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const auth = getAuth(firebaseApp);
 
   useEffect(() => {
-    // If finished loading and no user, redirect to login, unless on an auth page
-    if (!loading && !user && !['/login', '/signup'].includes(pathname)) {
+    // If finished loading, no user, and not on a public page, redirect to login
+    if (!loading && !user && !['/', '/login', '/signup', '/contact', '/legal'].includes(pathname)) {
       router.push('/login');
     }
   }, [user, loading, pathname, router]);
@@ -53,7 +54,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         title: 'Logged Out',
         description: 'You have been successfully logged out.',
       });
-      router.push('/login');
+      router.push('/');
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -71,22 +72,19 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   // While loading auth state, show a full-screen loader
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center">
+      <div className="flex h-screen w-full items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
   
-  // If we have a user, show the main dashboard layout
+  // If we have a user, show the main dashboard layout with sidebar
   if (user) {
     return (
       <SidebarProvider>
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="md:hidden" asChild>
-                <SidebarTrigger />
-              </Button>
               <BookHeart className="h-7 w-7 text-primary" />
               <h2 className="text-lg font-semibold tracking-tight">ColoringKit</h2>
             </div>
@@ -125,10 +123,13 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
           </SidebarFooter>
         </Sidebar>
         <SidebarInset>
-            <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-sm">
+            <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-sm md:hidden">
                 <div className="container flex h-14 items-center">
                     <SidebarTrigger className="mr-2" />
-                    {/* Header content can go here if needed */}
+                    <Link href="/" className="flex items-center space-x-2">
+                      <BookHeart className="h-6 w-6 text-primary" />
+                      <span className="font-bold">ColoringKit</span>
+                    </Link>
                 </div>
             </header>
             {children}
@@ -137,6 +138,16 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Fallback for when user is null but not loading (e.g. initial render)
+  // If no user and not loading, show a simple layout for public pages
+  if (!user && !loading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-background">
+        <Header />
+        <main className="flex-grow">{children}</main>
+      </div>
+    );
+  }
+
+  // Fallback
   return null;
 }

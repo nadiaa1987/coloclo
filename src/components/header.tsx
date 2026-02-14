@@ -24,7 +24,7 @@ export function Header() {
         title: "Logged Out",
         description: "You have been successfully logged out.",
       });
-      router.push('/login');
+      router.push('/');
     } catch (error: any) {
       toast({
         variant: "destructive",

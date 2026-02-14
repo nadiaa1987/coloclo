@@ -1,21 +1,168 @@
 "use client";
 
-import { useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, PlusSquare, Star, History, HelpCircle, Activity, Paintbrush } from 'lucide-react';
+import { Loader2, PlusSquare, History, HelpCircle, Activity, Paintbrush, BookOpen, Download, Star, CheckCircle } from 'lucide-react';
+import Image from 'next/image';
 
-type QuickAction = {
-  title: string;
-  description: string;
-  href: string;
-  icon: React.ElementType;
-};
 
-const quickActions: QuickAction[] = [
+function LandingPage() {
+  return (
+    <>
+      <main>
+        {/* Hero Section */}
+        <section className="bg-background text-foreground py-20 sm:py-24 lg:py-32">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+              AI Coloring Book Generator
+            </h1>
+            <p className="mt-6 text-lg max-w-2xl mx-auto text-muted-foreground">
+              Turn your ideas into beautiful, ready-to-print coloring pages in seconds. Perfect for KDP authors, teachers, and creative minds.
+            </p>
+            <div className="mt-10 flex items-center justify-center gap-x-6">
+              <Button asChild size="lg">
+                <Link href="/signup">Get Started for Free</Link>
+              </Button>
+              <Button asChild variant="ghost" size="lg">
+                <Link href="#pricing">View Pricing <span aria-hidden="true">→</span></Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section id="features" className="py-20 sm:py-24 lg:py-32">
+          <div className="container mx-auto px-4">
+            <div className="text-center max-w-2xl mx-auto">
+              <h2 className="text-3xl font-bold tracking-tight">Everything You Need to Create</h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                From prompt ideas to PDF export, we've got you covered.
+              </p>
+            </div>
+            <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center h-12 w-12 rounded-md bg-primary text-primary-foreground">
+                  <Paintbrush className="h-6 w-6" />
+                </div>
+                <h3 className="mt-5 text-lg font-semibold">AI Image Generation</h3>
+                <p className="mt-2 text-base text-muted-foreground">
+                  Use our powerful AI to generate high-quality, clean line art from text prompts in various styles.
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center h-12 w-12 rounded-md bg-primary text-primary-foreground">
+                  <BookOpen className="h-6 w-6" />
+                </div>
+                <h3 className="mt-5 text-lg font-semibold">Book Arrangement</h3>
+                <p className="mt-2 text-base text-muted-foreground">
+                  Easily drag and drop your generated pages to create the perfect coloring book sequence.
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center h-12 w-12 rounded-md bg-primary text-primary-foreground">
+                  <Download className="h-6 w-6" />
+                </div>
+                <h3 className="mt-5 text-lg font-semibold">KDP-Ready PDF Export</h3>
+                <p className="mt-2 text-base text-muted-foreground">
+                  Download your book as a PDF, with options for bleed and popular KDP trim sizes.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing Section */}
+        <section id="pricing" className="bg-muted py-20 sm:py-24 lg:py-32">
+          <div className="container mx-auto px-4">
+            <div className="text-center max-w-2xl mx-auto">
+              <h2 className="text-3xl font-bold tracking-tight">Simple, Transparent Pricing</h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Choose the plan that's right for you.
+              </p>
+            </div>
+            <div className="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              <Card className="flex flex-col">
+                <CardHeader>
+                  <CardTitle>Free</CardTitle>
+                  <CardDescription>Get a taste of our platform</CardDescription>
+                  <p className="text-4xl font-bold pt-4">$0<span className="text-sm font-normal text-muted-foreground">/month</span></p>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <ul className="space-y-3">
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />5 book generations</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />10 pages per book</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />Basic image styles</li>
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button asChild className="w-full" variant="outline">
+                    <Link href="/signup">Get Started</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+              <Card className="flex flex-col border-primary shadow-lg">
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <CardTitle>Pro Monthly</CardTitle>
+                    <div className="text-xs font-semibold bg-primary text-primary-foreground rounded-full px-2 py-0.5">Most Popular</div>
+                  </div>
+                  <CardDescription>For the serious creator</CardDescription>
+                  <p className="text-4xl font-bold pt-4">$29<span className="text-sm font-normal text-muted-foreground">/month</span></p>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <ul className="space-y-3">
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />Unlimited book generations</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />50 pages per book</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />All image styles</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />Save to history</li>
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button asChild className="w-full">
+                    <Link href="/signup">Choose Pro</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+              <Card className="flex flex-col">
+                <CardHeader>
+                  <CardTitle>Pro Yearly</CardTitle>
+                  <CardDescription>Save big with an annual plan</CardDescription>
+                  <p className="text-4xl font-bold pt-4">$299<span className="text-sm font-normal text-muted-foreground">/year</span></p>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <ul className="space-y-3">
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />Unlimited book generations</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />50 pages per book</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />All image styles</li>
+                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />Save to history</li>
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button asChild className="w-full" variant="outline">
+                    <Link href="/signup">Choose Yearly</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer className="bg-background border-t py-12">
+        <div className="container mx-auto px-4 text-center text-muted-foreground">
+          <p>&copy; {new Date().getFullYear()} AI Coloring Book Generator. All rights reserved.</p>
+          <div className="mt-4 flex justify-center gap-x-6">
+            <Link href="/legal" className="text-sm hover:underline">Legal</Link>
+            <Link href="/contact" className="text-sm hover:underline">Contact</Link>
+          </div>
+        </div>
+      </footer>
+    </>
+  );
+}
+
+const quickActions = [
   {
     title: 'AI Generator',
     description: 'Create new masterpieces',
@@ -36,32 +183,9 @@ const quickActions: QuickAction[] = [
   },
 ];
 
-export default function DashboardPage() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (loading) return; 
-
-    if (!user) {
-      router.push('/login');
-      return;
-    }
-  }, [user, loading, router]);
-
-  if (loading || !user) {
-    return (
-      <main className="flex h-screen items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </main>
-    );
-  }
-
-  const getInitials = (email: string | null) => {
-    if (!email) return 'U';
-    return email.charAt(0).toUpperCase();
-  };
-
+function DashboardPage() {
+  const { user } = useAuth();
+  if (!user) return null;
 
   return (
     <div className="flex-1 space-y-4 p-4 sm:p-8 pt-6">
@@ -131,4 +255,18 @@ export default function DashboardPage() {
       </div>
     </div>
   );
+}
+
+export default function Page() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <main className="flex h-screen items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </main>
+    );
+  }
+
+  return user ? <DashboardPage /> : <LandingPage />;
 }
