@@ -13,24 +13,40 @@ function LandingPage() {
     <>
       <main>
         {/* Hero Section */}
-        <section className="bg-background text-foreground py-20 sm:py-24 lg:py-32">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-              AI Coloring Book Generator
-            </h1>
-            <p className="mt-6 text-lg max-w-2xl mx-auto text-muted-foreground">
-              Turn your ideas into beautiful, ready-to-print coloring pages in seconds. Perfect for KDP authors, teachers, and creative minds.
-            </p>
-            <div className="mt-10 flex items-center justify-center gap-x-6">
-              <Button asChild size="lg">
-                <Link href="/signup">Sign Up Now</Link>
-              </Button>
-              <Button asChild variant="ghost" size="lg">
-                <Link href="#pricing">View Pricing <span aria-hidden="true">→</span></Link>
-              </Button>
+        <section className="bg-background text-foreground">
+          <div className="container mx-auto px-4 py-20 sm:py-24 lg:py-32 grid md:grid-cols-2 gap-12 items-center">
+            <div className="text-center md:text-left">
+              <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl leading-tight">
+                Your ultimate<br />
+                <span className="text-primary">all-in-one</span><br />
+                platform for Amazon KDP<br />
+                <span className="text-accent">Success</span>
+              </h1>
+              <p className="mt-6 text-lg max-w-xl mx-auto md:mx-0 text-muted-foreground">
+                Effortlessly create professional-grade puzzle books, coloring books, story books, journals, and niche planners designed to rank and sell. Go from idea to print-ready PDF for Amazon KDP in minutes, not weeks.
+              </p>
+              <div className="mt-10 flex items-center justify-center md:justify-start gap-x-4">
+                <Button asChild size="lg" className="font-semibold px-8 py-6 text-base">
+                  <Link href="/signup">Start Creating for Free</Link>
+                </Button>
+                <Button asChild variant="ghost" size="lg" className="font-semibold px-8 py-6 text-base">
+                  <Link href="#features">Explore Features</Link>
+                </Button>
+              </div>
+            </div>
+            <div className="flex justify-center items-center">
+                <Image
+                    src="https://picsum.photos/seed/kdp-app/800/600"
+                    alt="An illustration of the application dashboard showing various book creation tools."
+                    width={800}
+                    height={600}
+                    className="rounded-lg shadow-2xl"
+                    data-ai-hint="app screenshot"
+                />
             </div>
           </div>
         </section>
+
 
         {/* Features Section */}
         <section id="features" className="py-20 sm:py-24 lg:py-32">
