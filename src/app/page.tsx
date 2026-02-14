@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Loader2, PlusSquare, Star, History, HelpCircle, Activity, Box, Calendar, ShieldCheck, Paintbrush } from 'lucide-react';
+import { Loader2, PlusSquare, Star, History, HelpCircle, Activity, Box, Calendar, Paintbrush } from 'lucide-react';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 type QuickAction = {
   title: string;
@@ -60,11 +61,26 @@ const StatCard = ({ title, value, description, icon: Icon }: StatCardProps) => (
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [totalGenerations, setTotalGenerations] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (loading) return; 
+
+    if (!user) {
       router.push('/login');
+      return;
     }
+
+    const userDocRef = doc(db, 'users', user.uid);
+    const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setTotalGenerations(docSnap.data().totalGenerations ?? 0);
+      } else {
+        setTotalGenerations(0);
+      }
+    });
+
+    return () => unsubscribe();
   }, [user, loading, router]);
 
   if (loading || !user) {
@@ -105,7 +121,7 @@ export default function DashboardPage() {
       </Card>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <StatCard title="Total Generations" value="81" icon={Box} />
+        <StatCard title="Total Generations" value={totalGenerations !== null ? String(totalGenerations) : '...'} icon={Box} />
         <StatCard title="Images Today" value="0/∞" icon={Calendar} />
       </div>
 

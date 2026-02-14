@@ -55,6 +55,7 @@ export default function SignupPage() {
         plan: "none",
         createdAt: new Date(),
         dateend: null,
+        totalGenerations: 0,
       });
 
       toast({
