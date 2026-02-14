@@ -68,6 +68,7 @@ function SignupContent() {
           description: error.message,
         });
       }
+    } finally {
       setIsLoading(false);
     }
   };
