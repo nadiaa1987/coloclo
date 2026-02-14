@@ -34,7 +34,7 @@ function LandingPage() {
             <div className="flex justify-center items-center">
                 <div className="aspect-square w-full overflow-hidden rounded-lg shadow-2xl">
                     <Image
-                      src="https://raw.githubusercontent.com/nadiaa1987/coloclo/main/all.png"
+                      src="https://github.com/nadiaa1987/coloclo/blob/main/headerimage.png?raw=true"
                       alt="A collage of cute and cozy coloring book covers"
                       width={1024}
                       height={1024}
@@ -117,7 +117,7 @@ function LandingPage() {
                 </CardContent>
                 <CardFooter>
                   <Button asChild className="w-full">
-                    <Link href="/signup">Choose Pro</Link>
+                    <Link href="/signup">Sign Up Now</Link>
                   </Button>
                 </CardFooter>
               </Card>
