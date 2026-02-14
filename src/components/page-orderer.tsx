@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { ArrowLeft, Book, Download, GripVertical, Loader2 } from "lucide-react";
+import { ArrowLeft, Book, Download, GripVertical, Loader2, BookUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,7 @@ import {
   DialogFooter,
   DialogTrigger,
   DialogClose,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,6 +29,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useAuth } from "@/hooks/use-auth";
+import { saveBookAction } from "@/app/actions";
 
 type ImageResult = {
   id: string;
@@ -60,6 +63,10 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
   const [isDownloading, setIsDownloading] = useState(false);
   const [addBlankPages, setAddBlankPages] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+  
+  const [isSaving, setIsSaving] = useState(false);
+  const [bookName, setBookName] = useState(bookTopic || "My Coloring Book");
   
   const [isDraggingTitle, setIsDraggingTitle] = useState(false);
   const titlePageContainerRef = useRef<HTMLDivElement>(null);
@@ -145,6 +152,7 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
       window.removeEventListener('pointermove', handleTitleDragMove);
       window.removeEventListener('pointerup', handleTitleDragEnd);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDraggingTitle]);
 
 
@@ -213,6 +221,40 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
       toast({ variant: "destructive", title: "Uh oh! Something went wrong.", description: "Could not generate the PDF." });
     } finally {
       setIsDownloading(false);
+    }
+  };
+
+  const handleSaveToHistory = async () => {
+    if (!user) {
+      toast({ variant: "destructive", title: "You must be logged in to save." });
+      return;
+    }
+    if (!bookName.trim()) {
+      toast({ variant: "destructive", title: "Please enter a name for your book." });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const result = await saveBookAction({
+        userId: user.uid,
+        bookData: {
+          name: bookName,
+          topic: bookTopic || "",
+          pages: pages,
+          kdpSettings: kdpSettings,
+          titlePageSettings: titlePageSettings,
+        }
+      });
+      if (result.success) {
+        toast({ title: "Book Saved!", description: `"${bookName}" has been saved to your history.` });
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Failed to save book.", description: error.message });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -378,23 +420,58 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
               </div>
             ))}
           </div>
-          <div className="flex items-center justify-end space-x-2 mt-8">
-            <Switch id="blank-pages" checked={addBlankPages} onCheckedChange={setAddBlankPages} />
-            <Label htmlFor="blank-pages" className="font-normal">Add blank page after each coloring page</Label>
-          </div>
-          <div className="mt-2 flex justify-end gap-2">
-            <Button size="lg" onClick={handleDownloadPdf} disabled={isDownloading}>
-              {isDownloading ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              ) : (
-                <Download className="mr-2 h-5 w-5" />
-              )}
-              Download PDF
-            </Button>
-            <Button size="lg" disabled>
-              <Book className="mr-2 h-5 w-5" />
-              Download EPUB (Coming Soon)
-            </Button>
+          <div className="flex items-center justify-between space-x-2 mt-8">
+            <div className="flex items-center space-x-2">
+              <Switch id="blank-pages" checked={addBlankPages} onCheckedChange={setAddBlankPages} />
+              <Label htmlFor="blank-pages" className="font-normal">Add blank page after each coloring page</Label>
+            </div>
+            <div className="flex gap-2">
+               <Dialog>
+                <DialogTrigger asChild>
+                  <Button size="lg" variant="outline" disabled={!user}>
+                    <BookUp className="mr-2 h-5 w-5" />
+                    Save to History
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Save Your Coloring Book</DialogTitle>
+                    <DialogDescription>
+                      Give your book a name to save it to your history.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="book-name" className="text-right">
+                        Book Name
+                      </Label>
+                      <Input
+                        id="book-name"
+                        value={bookName}
+                        onChange={(e) => setBookName(e.target.value)}
+                        className="col-span-3"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button onClick={handleSaveToHistory} disabled={isSaving}>
+                        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Save Book
+                      </Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              <Button size="lg" onClick={handleDownloadPdf} disabled={isDownloading}>
+                {isDownloading ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <Download className="mr-2 h-5 w-5" />
+                )}
+                Download PDF
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
