@@ -149,7 +149,7 @@ function LandingPage() {
         <div className="container mx-auto px-4 text-center text-muted-foreground">
           <div className="flex justify-center mb-6">
             <Image
-              src="https://raw.githubusercontent.com/nadiaa1987/coloclo/main/logo.png"
+              src="https://github.com/nadiaa1987/coloclo/blob/main/logogcocowhy.png?raw=true"
               alt="Coco Wyo Logo"
               width={140}
               height={50}

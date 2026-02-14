@@ -87,7 +87,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
           <SidebarHeader>
             <Link href="/" className="flex items-center justify-center p-2">
                 <Image
-                    src="https://raw.githubusercontent.com/nadiaa1987/coloclo/main/logo.png"
+                    src="https://github.com/nadiaa1987/coloclo/blob/main/logogcocowhy.png?raw=true"
                     alt="Coco Wyo Logo"
                     width={150}
                     height={60}
@@ -134,7 +134,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                     <SidebarTrigger className="mr-2" />
                     <Link href="/" className="flex items-center space-x-2">
                         <Image
-                            src="https://raw.githubusercontent.com/nadiaa1987/coloclo/main/logo.png"
+                            src="https://github.com/nadiaa1987/coloclo/blob/main/logogcocowhy.png?raw=true"
                             alt="Coco Wyo Logo"
                             width={120}
                             height={40}
