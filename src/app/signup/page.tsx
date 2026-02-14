@@ -55,11 +55,19 @@ function SignupContent() {
       router.push("/");
 
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Signup Failed",
-        description: error.message,
-      });
+      if (error.code === 'auth/email-already-in-use') {
+        toast({
+          variant: "destructive",
+          title: "Account Exists",
+          description: "An account with this email already exists. Please use the link below to log in.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Signup Failed",
+          description: error.message,
+        });
+      }
       setIsLoading(false);
     }
   };
