@@ -23,7 +23,7 @@ function LandingPage() {
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Button asChild size="lg">
-                <Link href="/signup">Get Started for Free</Link>
+                <Link href="/signup">Sign Up Now</Link>
               </Button>
               <Button asChild variant="ghost" size="lg">
                 <Link href="#pricing">View Pricing <span aria-hidden="true">→</span></Link>
@@ -82,26 +82,7 @@ function LandingPage() {
                 Choose the plan that's right for you.
               </p>
             </div>
-            <div className="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              <Card className="flex flex-col">
-                <CardHeader>
-                  <CardTitle>Free</CardTitle>
-                  <CardDescription>Get a taste of our platform</CardDescription>
-                  <p className="text-4xl font-bold pt-4">$0<span className="text-sm font-normal text-muted-foreground">/month</span></p>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <ul className="space-y-3">
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />5 book generations</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />10 pages per book</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />Basic image styles</li>
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button asChild className="w-full" variant="outline">
-                    <Link href="/signup">Get Started</Link>
-                  </Button>
-                </CardFooter>
-              </Card>
+            <div className="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-3xl mx-auto">
               <Card className="flex flex-col border-primary shadow-lg">
                 <CardHeader>
                   <div className="flex justify-between items-center">
