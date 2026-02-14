@@ -3,7 +3,7 @@
 import { generateImageFromPrompt, GenerateImageFromPromptInput } from '@/ai/flows/generate-image-from-prompt';
 import { generatePrompts, GeneratePromptsInput } from '@/ai/flows/generate-prompts-flow';
 import { db } from '@/lib/firebase';
-import { collection, serverTimestamp, writeBatch, doc, increment, updateDoc } from 'firebase/firestore';
+import { collection, serverTimestamp, writeBatch, doc } from 'firebase/firestore';
 
 export async function generatePromptsAction(
   input: GeneratePromptsInput
@@ -19,7 +19,7 @@ export async function generatePromptsAction(
 }
 
 export async function generateBulkImagesAction(
-  { prompts, userId }: { prompts: string[], userId: string }
+  prompts: string[]
 ): Promise<{ success: boolean; imageUrl?: string; error?: string; prompt: string }[]> {
   const results = await Promise.all(
     prompts.map(async (prompt) => {
@@ -33,18 +33,6 @@ export async function generateBulkImagesAction(
       }
     })
   );
-
-  const successfulGenerations = results.filter(r => r.success).length;
-  if (successfulGenerations > 0 && userId) {
-    try {
-        const userDocRef = doc(db, 'users', userId);
-        await updateDoc(userDocRef, {
-            totalGenerations: increment(successfulGenerations)
-        });
-    } catch (error) {
-        console.error("Failed to update totalGenerations:", error);
-    }
-  }
   
   return results;
 }

@@ -1,14 +1,12 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, PlusSquare, Star, History, HelpCircle, Activity, Box, Calendar, Paintbrush } from 'lucide-react';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { Loader2, PlusSquare, Star, History, HelpCircle, Activity, Paintbrush } from 'lucide-react';
 
 type QuickAction = {
   title: string;
@@ -38,30 +36,9 @@ const quickActions: QuickAction[] = [
   },
 ];
 
-type StatCardProps = {
-  title: string;
-  value: string;
-  description?: string;
-  icon: React.ElementType;
-}
-
-const StatCard = ({ title, value, description, icon: Icon }: StatCardProps) => (
-  <Card>
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium">{title}</CardTitle>
-      <Icon className="h-4 w-4 text-muted-foreground" />
-    </CardHeader>
-    <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
-      {description && <p className="text-xs text-muted-foreground">{description}</p>}
-    </CardContent>
-  </Card>
-);
-
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [totalGenerations, setTotalGenerations] = useState<number | null>(null);
 
   useEffect(() => {
     if (loading) return; 
@@ -70,17 +47,6 @@ export default function DashboardPage() {
       router.push('/login');
       return;
     }
-
-    const userDocRef = doc(db, 'users', user.uid);
-    const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
-      if (docSnap.exists()) {
-        setTotalGenerations(docSnap.data().totalGenerations ?? 0);
-      } else {
-        setTotalGenerations(0);
-      }
-    });
-
-    return () => unsubscribe();
   }, [user, loading, router]);
 
   if (loading || !user) {
@@ -119,11 +85,6 @@ export default function DashboardPage() {
           </Button>
         </CardHeader>
       </Card>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <StatCard title="Total Generations" value={totalGenerations !== null ? String(totalGenerations) : '...'} icon={Box} />
-        <StatCard title="Images Today" value="0/∞" icon={Calendar} />
-      </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>

@@ -82,7 +82,6 @@ export default function CreatePage() {
           bookTopic={topic}
           onBack={handleBackToPrompt}
           onImagesGenerated={handleImagesGenerated}
-          userId={user.uid}
         />
       )}
       {step === 'order' && (

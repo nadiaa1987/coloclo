@@ -31,10 +31,9 @@ type ImageGeneratorProps = {
   bookTopic?: string;
   onBack: () => void;
   onImagesGenerated: (images: ImageResult[]) => void;
-  userId: string;
 };
 
-export function ImageGenerator({ initialPrompts, bookTopic, onBack, onImagesGenerated, userId }: ImageGeneratorProps) {
+export function ImageGenerator({ initialPrompts, bookTopic, onBack, onImagesGenerated }: ImageGeneratorProps) {
   const [imageResults, setImageResults] = useState<ImageResult[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [regeneratingIds, setRegeneratingIds] = useState<string[]>([]);
@@ -63,7 +62,7 @@ export function ImageGenerator({ initialPrompts, bookTopic, onBack, onImagesGene
     }
 
     try {
-      const results = await generateBulkImagesAction({ prompts, userId });
+      const results = await generateBulkImagesAction(prompts);
       
       const successfulResults = results
         .filter(r => r.success && r.imageUrl)
