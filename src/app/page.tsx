@@ -19,27 +19,25 @@ function LandingPage() {
   const [isSubscribing, setIsSubscribing] = useState<'monthly' | 'yearly' | null>(null);
 
   const handleSubscribe = async (plan: 'monthly' | 'yearly') => {
-    if (!user) {
-      router.push('/login');
-      return;
-    }
-    
-    setIsSubscribing(plan);
-    
-    try {
-      const result = await createCheckoutSessionAction({ userId: user.uid, plan });
-      if (result.success && result.url) {
-        router.push(result.url);
-      } else {
-        throw new Error(result.error || 'Failed to create checkout session.');
+    if (user) {
+      setIsSubscribing(plan);
+      try {
+        const result = await createCheckoutSessionAction({ userId: user.uid, plan });
+        if (result.success && result.url) {
+          router.push(result.url);
+        } else {
+          throw new Error(result.error || 'Failed to create checkout session.');
+        }
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Subscription Error",
+          description: error.message,
+        });
+        setIsSubscribing(null);
       }
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Subscription Error",
-        description: error.message,
-      });
-      setIsSubscribing(null);
+    } else {
+      router.push(`/signup?plan=${plan}`);
     }
   };
 
@@ -152,7 +150,7 @@ function LandingPage() {
                 </CardContent>
                 <CardFooter>
                   <Button className="w-full" onClick={() => handleSubscribe('monthly')} disabled={isSubscribing === 'monthly'}>
-                    {isSubscribing === 'monthly' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (user ? 'Subscribe Now' : 'Sign Up to Subscribe')}
+                    {isSubscribing === 'monthly' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (user ? 'Subscribe Now' : 'Get Started')}
                   </Button>
                 </CardFooter>
               </Card>
@@ -172,7 +170,7 @@ function LandingPage() {
                 </CardContent>
                 <CardFooter>
                   <Button className="w-full" variant="outline" onClick={() => handleSubscribe('yearly')} disabled={isSubscribing === 'yearly'}>
-                    {isSubscribing === 'yearly' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (user ? 'Subscribe Now' : 'Sign Up to Subscribe')}
+                    {isSubscribing === 'yearly' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (user ? 'Subscribe Now' : 'Get Started')}
                   </Button>
                 </CardFooter>
               </Card>

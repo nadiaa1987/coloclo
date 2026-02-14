@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
+import { createCheckoutSessionAction } from "@/app/actions";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address."),
@@ -32,8 +33,10 @@ const formSchema = z.object({
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const auth = getAuth(firebaseApp);
+  const plan = searchParams.get('plan') as 'monthly' | 'yearly' | null;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -64,16 +67,26 @@ export default function SignupPage() {
 
       toast({
         title: "Account Created",
-        description: "You have successfully signed up!",
+        description: plan ? "Redirecting to payment..." : "You have successfully signed up!",
       });
-      router.push("/");
+      
+      if (plan) {
+        const result = await createCheckoutSessionAction({ userId: user.uid, plan });
+        if (result.success && result.url) {
+          router.push(result.url);
+        } else {
+          throw new Error(result.error || 'Failed to create checkout session.');
+        }
+      } else {
+        router.push("/");
+      }
+
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Signup Failed",
         description: error.message,
       });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -82,9 +95,11 @@ export default function SignupPage() {
     <main className="flex items-center justify-center min-h-screen -mt-14">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Sign Up</CardTitle>
+          <CardTitle className="text-2xl">{plan ? 'Create Account' : 'Sign Up'}</CardTitle>
           <CardDescription>
-            Enter your information to create an account.
+            {plan
+              ? `Create an account to start your ${plan} subscription.`
+              : 'Enter your information to create an account.'}
           </CardDescription>
         </CardHeader>
         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -114,11 +129,11 @@ export default function SignupPage() {
           <CardFooter className="flex flex-col">
             <Button className="w-full" type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create account
+              {plan ? 'Continue to Payment' : 'Create account'}
             </Button>
             <div className="mt-4 text-center text-sm">
               Already have an account?{" "}
-              <Link href="/login" className="underline">
+              <Link href={plan ? `/login?plan=${plan}` : "/login"} className="underline">
                 Login
               </Link>
             </div>
