@@ -3,7 +3,7 @@
 import { generateImageFromPrompt, GenerateImageFromPromptInput } from '@/ai/flows/generate-image-from-prompt';
 import { generatePrompts, GeneratePromptsInput } from '@/ai/flows/generate-prompts-flow';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, serverTimestamp, writeBatch, doc } from 'firebase/firestore';
 
 export async function generatePromptsAction(
   input: GeneratePromptsInput
@@ -65,11 +65,27 @@ export async function saveBookAction(
   }
 
   try {
-    const historyCollectionRef = collection(db, "users", userId, "books");
-    await addDoc(historyCollectionRef, {
-      ...bookData,
+    const { pages, ...bookMetadata } = bookData;
+    const booksCollectionRef = collection(db, "users", userId, "books");
+    const newBookRef = doc(booksCollectionRef);
+    const batch = writeBatch(db);
+
+    batch.set(newBookRef, {
+      ...bookMetadata,
       createdAt: serverTimestamp(),
     });
+
+    const pagesCollectionRef = collection(newBookRef, "pages");
+    pages.forEach((page, index) => {
+      const pageRef = doc(pagesCollectionRef, page.id || `${index}`);
+      batch.set(pageRef, {
+        ...page,
+        order: index
+      });
+    });
+
+    await batch.commit();
+
     return { success: true };
   } catch (error) {
     console.error("Error saving book:", error);
