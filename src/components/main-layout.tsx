@@ -27,7 +27,6 @@ import { BookHeart, LayoutDashboard, Wand2, LifeBuoy, Star, Mail, LogOut, Loader
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/create', label: 'Generator', icon: Wand2 },
-  { href: '/upgrade', label: 'Upgrade Plan', icon: Star },
   { href: '/contact', label: 'Contact', icon: Mail },
   { href: '/legal', label: 'Legal', icon: LifeBuoy },
 ];

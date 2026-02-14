@@ -24,12 +24,6 @@ const quickActions: QuickAction[] = [
     icon: Paintbrush,
   },
   {
-    title: 'Upgrade Plan',
-    description: 'Extend your capabilities',
-    href: '/upgrade',
-    icon: Star,
-  },
-  {
     title: 'View History',
     description: 'Browse your gallery',
     href: '/history',
@@ -110,11 +104,9 @@ export default function DashboardPage() {
         </CardHeader>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2">
         <StatCard title="Total Generations" value="81" icon={Box} />
         <StatCard title="Images Today" value="0/∞" icon={Calendar} />
-        <StatCard title="Current Plan" value="Pro" description="LIFETIME ACCESS" icon={Star} />
-        <StatCard title="Creation Limit" value="Unlimited" icon={ShieldCheck} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
