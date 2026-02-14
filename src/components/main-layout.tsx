@@ -120,7 +120,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                </Avatar>
                <div className="flex-1 overflow-hidden">
                  <p className="truncate text-sm font-medium">{user.email}</p>
-                 <p className="truncate text-xs text-muted-foreground">Pro Plan</p>
+                 <p className="truncate text-xs text-muted-foreground">Member</p>
                </div>
                <Button variant="ghost" size="icon" onClick={handleLogout}>
                  <LogOut />

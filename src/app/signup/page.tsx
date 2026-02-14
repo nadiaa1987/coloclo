@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -23,7 +23,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
-import { createCheckoutSessionAction } from "@/app/actions";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address."),
@@ -33,10 +32,8 @@ const formSchema = z.object({
 function SignupContent() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { toast } = useToast();
   const auth = getAuth(firebaseApp);
-  const plan = searchParams.get('plan') as 'monthly' | 'yearly' | null;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -55,31 +52,16 @@ function SignupContent() {
       // Create user document in Firestore
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
-        plan: "none",
+        plan: "free",
         createdAt: new Date(),
-        dateend: null,
-        totalGenerations: 0,
-        stripeCustomerId: null,
-        stripeSubscriptionId: null,
-        stripePriceId: null,
-        stripeCurrentPeriodEnd: null,
       });
 
       toast({
         title: "Account Created",
-        description: plan ? "Redirecting to payment..." : "You have successfully signed up!",
+        description: "You have successfully signed up!",
       });
       
-      if (plan) {
-        const result = await createCheckoutSessionAction({ userId: user.uid, plan });
-        if (result.success && result.url) {
-          window.location.href = result.url;
-        } else {
-          throw new Error(result.error || 'Failed to create checkout session.');
-        }
-      } else {
-        router.push("/");
-      }
+      router.push("/");
 
     } catch (error: any) {
       toast({
@@ -94,11 +76,9 @@ function SignupContent() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle className="text-2xl">{plan ? 'Create Account' : 'Sign Up'}</CardTitle>
+        <CardTitle className="text-2xl">Sign Up</CardTitle>
         <CardDescription>
-          {plan
-            ? `Create an account to start your ${plan} subscription.`
-            : 'Enter your information to create an account.'}
+          Enter your information to create an account.
         </CardDescription>
       </CardHeader>
       <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -128,11 +108,11 @@ function SignupContent() {
         <CardFooter className="flex flex-col">
           <Button className="w-full" type="submit" disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {plan ? 'Continue to Payment' : 'Create account'}
+            Create account
           </Button>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
-            <Link href={plan ? `/login?plan=${plan}` : "/login"} className="underline">
+            <Link href="/login" className="underline">
               Login
             </Link>
           </div>

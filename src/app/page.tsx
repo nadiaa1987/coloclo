@@ -1,47 +1,14 @@
 "use client";
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, PlusSquare, History, HelpCircle, Activity, Paintbrush, BookOpen, Download, Star, CheckCircle } from 'lucide-react';
+import { Loader2, PlusSquare, History, HelpCircle, Activity, Paintbrush, BookOpen, Download, Star } from 'lucide-react';
 import Image from 'next/image';
 import React from "react";
-import { createCheckoutSessionAction } from './actions';
-import { useToast } from '@/hooks/use-toast';
 
 function LandingPage() {
-  const { user } = useAuth();
-  const router = useRouter();
-  const { toast } = useToast();
-  const [isSubscribing, setIsSubscribing] = useState<'monthly' | 'yearly' | null>(null);
-
-  const handleSubscribe = async (plan: 'monthly' | 'yearly') => {
-    if (user) {
-      setIsSubscribing(plan);
-      try {
-        const result = await createCheckoutSessionAction({ userId: user.uid, plan });
-        if (result.success && result.url) {
-          router.push(result.url);
-        } else {
-          throw new Error(result.error || 'Failed to create checkout session.');
-        }
-      } catch (error: any) {
-        toast({
-          variant: "destructive",
-          title: "Subscription Error",
-          description: error.message,
-        });
-        setIsSubscribing(null);
-      }
-    } else {
-      router.push(`/signup?plan=${plan}`);
-    }
-  };
-
-
   return (
     <>
       <main>
@@ -117,63 +84,6 @@ function LandingPage() {
                   Download your book as a PDF, with options for bleed and popular KDP trim sizes.
                 </p>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Pricing Section */}
-        <section id="pricing" className="bg-muted py-20 sm:py-24 lg:py-32">
-          <div className="container mx-auto px-4">
-            <div className="text-center max-w-2xl mx-auto">
-              <h2 className="text-3xl font-bold tracking-tight">Simple, Transparent Pricing</h2>
-              <p className="mt-4 text-lg text-muted-foreground">
-                Choose the plan that's right for you.
-              </p>
-            </div>
-            <div className="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-3xl mx-auto">
-              <Card className="flex flex-col border-primary shadow-lg">
-                <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <CardTitle>Pro Monthly</CardTitle>
-                    <div className="text-xs font-semibold bg-primary text-primary-foreground rounded-full px-2 py-0.5">Most Popular</div>
-                  </div>
-                  <CardDescription>For the serious creator</CardDescription>
-                  <p className="text-4xl font-bold pt-4">$29<span className="text-sm font-normal text-muted-foreground">/month</span></p>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <ul className="space-y-3">
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />Unlimited book generations</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />50 pages per book</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />All image styles</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />Save to history</li>
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full" onClick={() => handleSubscribe('monthly')} disabled={isSubscribing === 'monthly'}>
-                    {isSubscribing === 'monthly' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (user ? 'Subscribe Now' : 'Get Started')}
-                  </Button>
-                </CardFooter>
-              </Card>
-              <Card className="flex flex-col">
-                <CardHeader>
-                  <CardTitle>Pro Yearly</CardTitle>
-                  <CardDescription>Save big with an annual plan</CardDescription>
-                  <p className="text-4xl font-bold pt-4">$299<span className="text-sm font-normal text-muted-foreground">/year</span></p>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <ul className="space-y-3">
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />Unlimited book generations</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />50 pages per book</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />All image styles</li>
-                    <li className="flex items-center"><CheckCircle className="h-5 w-5 text-primary mr-2" />Save to history</li>
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full" variant="outline" onClick={() => handleSubscribe('yearly')} disabled={isSubscribing === 'yearly'}>
-                    {isSubscribing === 'yearly' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (user ? 'Subscribe Now' : 'Get Started')}
-                  </Button>
-                </CardFooter>
-              </Card>
             </div>
           </div>
         </section>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -22,7 +22,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
-import { createCheckoutSessionAction } from "@/app/actions";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address."),
@@ -32,10 +31,8 @@ const formSchema = z.object({
 function LoginContent() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { toast } = useToast();
   const auth = getAuth(firebaseApp);
-  const plan = searchParams.get('plan') as 'monthly' | 'yearly' | null;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,24 +45,14 @@ function LoginContent() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
-      const user = userCredential.user;
+      await signInWithEmailAndPassword(auth, values.email, values.password);
 
       toast({
         title: "Login Successful",
-        description: plan ? "Redirecting to payment..." : "Welcome back!",
+        description: "Welcome back!",
       });
 
-      if (plan) {
-        const result = await createCheckoutSessionAction({ userId: user.uid, plan });
-        if (result.success && result.url) {
-          window.location.href = result.url;
-        } else {
-          throw new Error(result.error || 'Failed to create checkout session.');
-        }
-      } else {
-        router.push("/");
-      }
+      router.push("/");
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -81,9 +68,7 @@ function LoginContent() {
       <CardHeader>
         <CardTitle className="text-2xl">Login</CardTitle>
         <CardDescription>
-          {plan
-            ? `Login to complete your ${plan} subscription.`
-            : 'Enter your email below to login to your account.'}
+          Enter your email below to login to your account.
         </CardDescription>
       </CardHeader>
       <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -113,11 +98,11 @@ function LoginContent() {
         <CardFooter className="flex flex-col">
           <Button className="w-full" type="submit" disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {plan ? 'Login & Continue' : 'Sign in'}
+            Sign in
           </Button>
           <div className="mt-4 text-center text-sm">
             Don't have an account?{" "}
-            <Link href={plan ? `/signup?plan=${plan}` : "/signup"} className="underline">
+            <Link href="/signup" className="underline">
               Sign up
             </Link>
           </div>
