@@ -33,12 +33,12 @@ function LandingPage() {
             </div>
             <div className="flex justify-center items-center">
                 <Image
-                    src="https://picsum.photos/seed/kdp-app/800/600"
-                    alt="An illustration of the application dashboard showing various book creation tools."
+                    src="https://picsum.photos/seed/building-app/800/600"
+                    alt="An illustration of a modern building, representing a solid platform."
                     width={800}
                     height={600}
                     className="rounded-lg shadow-2xl"
-                    data-ai-hint="app screenshot"
+                    data-ai-hint="building street"
                 />
             </div>
           </div>
