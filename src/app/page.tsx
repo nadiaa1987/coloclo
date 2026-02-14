@@ -32,14 +32,16 @@ function LandingPage() {
               </div>
             </div>
             <div className="flex justify-center items-center">
-                <Image
-                    src="https://picsum.photos/seed/building-app/800/600"
-                    alt="An illustration of a modern building, representing a solid platform."
-                    width={800}
-                    height={600}
-                    className="rounded-lg shadow-2xl"
-                    data-ai-hint="building street"
-                />
+                <div className="aspect-video w-full overflow-hidden rounded-lg shadow-2xl">
+                    <iframe
+                        className="h-full w-full"
+                        src="https://www.youtube.com/embed/rtK94eCtLvg?autoplay=1&mute=1&controls=0&loop=1&playlist=rtK94eCtLvg&playsinline=1&rel=0"
+                        title="YouTube video player"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                    ></iframe>
+                </div>
             </div>
           </div>
         </section>
