@@ -66,10 +66,10 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
   const [addBlankPages, setAddBlankPages] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
-  
+
   const [isSaving, setIsSaving] = useState(false);
   const [bookName, setBookName] = useState(bookTopic || "My Coloring Book");
-  
+
   const [isDraggingTitle, setIsDraggingTitle] = useState(false);
   const titlePageContainerRef = useRef<HTMLDivElement>(null);
 
@@ -88,11 +88,11 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
     e.dataTransfer.effectAllowed = 'move';
     setDraggingItem(id);
   };
-  
+
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault(); // Necessary to allow dropping
   };
-  
+
   const handleDrop = (e: React.DragEvent<HTMLDivElement>, dropId: string) => {
     e.preventDefault();
     if (draggingItem === null) return;
@@ -112,7 +112,7 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
     setPages(newPages);
     setDraggingItem(null);
   };
-  
+
   const handleDragEnd = () => {
     setDraggingItem(null);
   };
@@ -130,7 +130,7 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
     const rect = titlePageContainerRef.current.getBoundingClientRect();
     const newX = ((e.clientX - rect.left) / rect.width) * 100;
     const newY = ((e.clientY - rect.top) / rect.height) * 100;
-    
+
     const clampedX = Math.max(0, Math.min(100, newX));
     const clampedY = Math.max(0, Math.min(100, newY));
 
@@ -154,7 +154,7 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
       window.removeEventListener('pointermove', handleTitleDragMove);
       window.removeEventListener('pointerup', handleTitleDragEnd);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDraggingTitle]);
 
 
@@ -190,7 +190,7 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
 
       doc.setFont(fontFamily, 'normal');
       doc.setFontSize(fontSize);
-      
+
       const xPos = pageWidth * (textX / 100);
       const yPos = pageHeight * (textY / 100);
 
@@ -200,25 +200,25 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
       for (let i = 0; i < pages.length; i++) {
         // Add a page for the coloring image itself
         doc.addPage([pageWidth, pageHeight], pageWidth > pageHeight ? 'landscape' : 'portrait');
-        
+
         const page = pages[i];
         const imgData = page.imageUrl;
         const imageWidth = pageWidth - margin * 2;
         const imageHeight = pageHeight - margin * 2;
         const x = margin;
         const y = margin;
-        
+
         doc.addImage(imgData, 'PNG', x, y, imageWidth, imageHeight);
-        
+
         // Add a blank page after the coloring page if requested
         if (addBlankPages) {
           doc.addPage([pageWidth, pageHeight], pageWidth > pageHeight ? 'landscape' : 'portrait');
         }
       }
-      
+
       doc.save(`${bookTopic?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'coloring_book'}.pdf`);
       toast({ title: "Download started!", description: "Your PDF book is being downloaded." });
-    } catch(error) {
+    } catch (error) {
       console.error(error);
       toast({ variant: "destructive", title: "Uh oh! Something went wrong.", description: "Could not generate the PDF." });
     } finally {
@@ -284,9 +284,9 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
       </Button>
       <Card className="max-w-6xl mx-auto shadow-lg rounded-xl">
         <CardHeader className="text-center">
-            <CardTitle className="text-4xl font-headline tracking-tighter">Arrange Your Coloring Book</CardTitle>
+          <CardTitle className="text-4xl font-headline tracking-tighter">Arrange Your Coloring Book</CardTitle>
           <CardDescription className="pt-2">
-            Drag and drop the pages to set the order for your book: "{bookTopic}". Click the first page to edit it.
+            Drag and drop the pages to set the order for your book: &quot;{bookTopic}&quot;. Click the first page to edit it.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -298,29 +298,29 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
             }}>
               <DialogTrigger asChild>
                 <div
-                    className={cn(
-                        "rounded-lg border bg-card p-2 shadow-sm flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors"
-                    )}
+                  className={cn(
+                    "rounded-lg border bg-card p-2 shadow-sm flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors"
+                  )}
                 >
-                    <div className="flex justify-between items-center mb-2 w-full">
-                        <span className="font-bold text-lg">1</span>
-                    </div>
-                    <div ref={titlePageContainerRef} className="aspect-square relative w-full bg-muted/50 rounded-md overflow-hidden">
-                        <p 
-                          onPointerDown={handleTitleDragStart}
-                          className="font-semibold text-muted-foreground break-words absolute cursor-move select-none"
-                          style={{
-                            fontSize: `${Math.min(titlePageSettings.fontSize, 32)}px`,
-                            left: `${titlePageSettings.x}%`,
-                            top: `${titlePageSettings.y}%`,
-                            transform: `translate(-${titlePageSettings.textAlign === 'center' ? 50 : titlePageSettings.textAlign === 'right' ? 100 : 0}%, -50%)`,
-                            textAlign: titlePageSettings.textAlign,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          {titlePageSettings.text}
-                        </p>
-                    </div>
+                  <div className="flex justify-between items-center mb-2 w-full">
+                    <span className="font-bold text-lg">1</span>
+                  </div>
+                  <div ref={titlePageContainerRef} className="aspect-square relative w-full bg-muted/50 rounded-md overflow-hidden">
+                    <p
+                      onPointerDown={handleTitleDragStart}
+                      className="font-semibold text-muted-foreground break-words absolute cursor-move select-none"
+                      style={{
+                        fontSize: `${Math.min(titlePageSettings.fontSize, 32)}px`,
+                        left: `${titlePageSettings.x}%`,
+                        top: `${titlePageSettings.y}%`,
+                        transform: `translate(-${titlePageSettings.textAlign === 'center' ? 50 : titlePageSettings.textAlign === 'right' ? 100 : 0}%, -50%)`,
+                        textAlign: titlePageSettings.textAlign,
+                        lineHeight: 1.2
+                      }}
+                    >
+                      {titlePageSettings.text}
+                    </p>
+                  </div>
                 </div>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
@@ -356,9 +356,9 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
                       Font
                     </Label>
                     <Select
-                        value={editingTitlePageSettings.fontFamily}
-                        onValueChange={(value) => setEditingTitlePageSettings({ ...editingTitlePageSettings, fontFamily: value })}
-                      >
+                      value={editingTitlePageSettings.fontFamily}
+                      onValueChange={(value) => setEditingTitlePageSettings({ ...editingTitlePageSettings, fontFamily: value })}
+                    >
                       <SelectTrigger className="col-span-3">
                         <SelectValue placeholder="Select a font" />
                       </SelectTrigger>
@@ -374,12 +374,12 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
                     <RadioGroup
                       value={editingTitlePageSettings.textAlign}
                       onValueChange={(value: string) => {
-                          if (value) {
-                             setEditingTitlePageSettings({ ...editingTitlePageSettings, textAlign: value as "left" | "center" | "right" })
-                          }
+                        if (value) {
+                          setEditingTitlePageSettings({ ...editingTitlePageSettings, textAlign: value as "left" | "center" | "right" })
                         }
                       }
-      
+                      }
+
                       className="col-span-3 flex space-x-4"
                     >
                       <div className="flex items-center space-x-2">
@@ -424,16 +424,16 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
                   <GripVertical className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div className="flex-grow flex items-center justify-center">
-                    <div className="w-full aspect-square relative bg-muted/50 rounded-md overflow-hidden">
-                        <Image
-                            src={page.imageUrl}
-                            alt={page.prompt}
-                            fill
-                            className="object-contain"
-                            data-ai-hint="generated coloring page"
-                            unoptimized
-                        />
-                    </div>
+                  <div className="w-full aspect-square relative bg-muted/50 rounded-md overflow-hidden">
+                    <Image
+                      src={page.imageUrl}
+                      alt={page.prompt}
+                      fill
+                      className="object-contain"
+                      data-ai-hint="generated coloring page"
+                      unoptimized
+                    />
+                  </div>
                 </div>
               </div>
             ))}
@@ -444,7 +444,7 @@ export function PageOrderer({ initialImages, onBack, bookTopic, kdpSettings }: P
               <Label htmlFor="blank-pages" className="font-normal">Add blank page after each coloring page</Label>
             </div>
             <div className="flex gap-2">
-               <Dialog>
+              <Dialog>
                 <DialogTrigger asChild>
                   <Button size="lg" variant="outline" disabled={!user}>
                     <BookUp className="mr-2 h-5 w-5" />

@@ -43,39 +43,48 @@ Generate ${input.count} unique and descriptive prompts based on the topic: '${in
 Each prompt should be in the style of '${input.style}'.
 Each prompt should describe a scene that would make a great black and white coloring page for kids or adults.
 Focus on clear, simple, and imaginative scenes. Avoid overly complex or abstract ideas.
-The output should be only the list of prompts, each on a new line.`;
-    
-    const encodedPrompt = encodeURIComponent(textGenerationPrompt);
-    const url = `https://gen.pollinations.ai/text/${encodedPrompt}?model=gemini-fast&key=sk_UOsZKtGMSYNskyHUmwbWTQEdYPKv2UxR`;
+The output should be only the list of prompts, each on a new line. No extra commentary, no titles, just the list.`;
 
-    const response = await fetch(url);
+    // Use POST /v1/chat/completions (OpenAI-compatible) instead of GET /text/{prompt}
+    // because the GET endpoint returns 404 when the encoded URL is too long.
+    const apiKey = process.env.POLLINATIONS_API_KEY;
+    const model = process.env.TEXT_MODEL || 'gemini-fast';
+
+    const response = await fetch('https://gen.pollinations.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [
+          { role: 'user', content: textGenerationPrompt },
+        ],
+        temperature: 0.9,
+        max_tokens: 2000,
+        stream: false,
+      }),
+    });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch prompts from Pollinations AI: ${response.statusText}`);
+      const errorText = await response.text().catch(() => response.statusText);
+      throw new Error(`Failed to fetch prompts from Pollinations AI: ${response.status} — ${errorText}`);
     }
 
-    const responseText = await response.text();
-    let promptsList: string[] = [];
+    const data = await response.json();
+    const responseText: string = data?.choices?.[0]?.message?.content ?? '';
 
-    try {
-      // Pollinations.ai can return a JSON object with an 'output' field
-      const data = JSON.parse(responseText);
-      if (data && data.output && typeof data.output === 'string') {
-        promptsList = data.output.split('\n');
-      } else {
-        // Or it might be a plain string in the response
-        promptsList = responseText.split('\n');
-      }
-    } catch (error) {
-      // If parsing fails, assume it's a plain text response with newlines
-      promptsList = responseText.split('\n');
+    if (!responseText) {
+      throw new Error('Pollinations AI returned an empty response.');
     }
-    
-    const prompts = promptsList
-      .map(p => p.trim())
-      .filter(p => p.length > 0)
+
+    const prompts = responseText
+      .split('\n')
+      .map((p: string) => p.trim())
+      .filter((p: string) => p.length > 0)
       // Remove any list numbering like "1. " or "- "
-      .map(p => p.replace(/^\s*(\d+\.|-)\s*/, ''));
+      .map((p: string) => p.replace(/^\s*(\d+\.|-)\s*/, ''));
 
     return { prompts };
   }

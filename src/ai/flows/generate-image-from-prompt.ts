@@ -48,7 +48,10 @@ const generateImageFromPromptFlow = ai.defineFlow(
     const coloringPrompt = `${input.prompt}, coloring book page for kdp, black and white, clean line art`;
     const encodedPrompt = encodeURIComponent(coloringPrompt);
 
-    const imageUrl = `https://gen.pollinations.ai/image/${encodedPrompt}?model=flux&width=1024&height=1024&seed=123&key=sk_UOsZKtGMSYNskyHUmwbWTQEdYPKv2UxR`;
+    const randomSeed = Math.floor(Math.random() * 1000000);
+    const apiKey = process.env.POLLINATIONS_API_KEY;
+    const model = process.env.IMAGE_MODEL || 'flux';
+    const imageUrl = `https://gen.pollinations.ai/image/${encodedPrompt}?model=${model}&width=1024&height=1024&seed=${randomSeed}&key=${apiKey}`;
 
     const response = await fetch(imageUrl);
 
