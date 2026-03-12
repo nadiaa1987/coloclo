@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
@@ -21,9 +22,11 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <MainLayout>
-          {children}
-        </MainLayout>
+        <Suspense fallback={null}>
+          <MainLayout>
+            {children}
+          </MainLayout>
+        </Suspense>
         <Toaster />
       </body>
     </html>
